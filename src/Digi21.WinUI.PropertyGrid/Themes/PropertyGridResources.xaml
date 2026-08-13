@@ -113,7 +113,7 @@
     </ResourceDictionary.ThemeDictionaries>
 
     <!-- Metrics. The same in every theme, so they sit in the root rather than in a theme dictionary. -->
-    <x:Double x:Key="PropertyGridRowHeight">28</x:Double>
+    <x:Double x:Key="PropertyGridRowHeight">32</x:Double>
     <x:Double x:Key="PropertyGridCategoryHeaderHeight">30</x:Double>
     <x:Double x:Key="PropertyGridNameColumnWidth">160</x:Double>
     <x:Double x:Key="PropertyGridMinimumNameColumnWidth">48</x:Double>

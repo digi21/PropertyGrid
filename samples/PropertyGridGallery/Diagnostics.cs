@@ -172,7 +172,19 @@ internal sealed class Diagnostics
             TrackInnerEditor(element);
         }
 
+        // Row heights, because a row that has to grow for a tall editor and a row that must stay
+        // dense for a single-line one are the same code path pulling in opposite directions.
+        List<string> heights = [];
+        for (int index = 0; index < grid.Rows.Count && heights.Count < 6; index++)
+        {
+            if (repeater?.TryGetElement(index) is FrameworkElement element)
+            {
+                heights.Add($"{grid.Rows[index].Key}={element.ActualHeight:0.#}");
+            }
+        }
+
         report.AppendLine($"--- {stage} ---");
+        report.AppendLine($"row heights: {string.Join(", ", heights)}");
         report.AppendLine($"realized elements: {realized} of {grid.Rows.Count}");
         report.AppendLine($"realized elements whose editor resolved: {withEditor}");
         report.AppendLine($"ElementPrepared raised: {prepared}");
@@ -298,14 +310,18 @@ internal sealed class SyntheticProvider(int count) : IPropertyDescriptionProvide
                 _ => typeof(string),
             };
 
+            // Every tenth one is multi-line, so the report shows both a dense row and a grown one.
+            bool tall = index % 10 == 3;
+
             properties.Add(new PropertyDescription
             {
                 Name = name,
                 PropertyType = propertyType,
                 DeclaringType = type,
-                Accessor = new BagAccessor(name, propertyType),
+                Accessor = new BagAccessor(name, propertyType, tall),
                 CategoryName = $"Group {index / 25:D2}",
                 HelpText = $"Synthetic property number {index}.",
+                EditorKey = tall ? PropertyEditorKeys.MultilineString : null,
             });
         }
 
@@ -318,7 +334,7 @@ internal sealed class SyntheticBag
     internal Dictionary<string, object?> Values { get; } = [];
 }
 
-internal sealed class BagAccessor(string name, Type propertyType) : PropertyAccessor
+internal sealed class BagAccessor(string name, Type propertyType, bool tall = false) : PropertyAccessor
 {
     public override bool CanRead => true;
 
@@ -327,7 +343,9 @@ internal sealed class BagAccessor(string name, Type propertyType) : PropertyAcce
     protected override object? GetValueCore(object target) =>
         target is SyntheticBag bag && bag.Values.TryGetValue(name, out object? value)
             ? value
-            : propertyType == typeof(string) ? name : Activator.CreateInstance(propertyType);
+            : propertyType == typeof(string)
+                ? tall ? name + "\r\nsecond line\r\nthird line" : name
+                : Activator.CreateInstance(propertyType);
 
     protected override void SetValueCore(object target, object? value)
     {

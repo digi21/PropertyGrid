@@ -14,7 +14,8 @@ namespace PropertyGridGallery;
 public class SampleModel : ObservableObject
 {
     private string name = "Parcels";
-    private string notes = "Cadastral parcels, revision of 2026.";
+    private string notes = "Cadastral parcels, revision of 2026." + "\r\n"
+        + "Three lines, so the row has to grow to fit the editor rather than clipping it.";
     private Guid internalId = Guid.NewGuid();
     private int opacity = 80;
     private bool isVisible = true;

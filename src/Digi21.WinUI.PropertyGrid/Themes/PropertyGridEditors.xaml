@@ -20,6 +20,7 @@
 
     <DataTemplate x:Key="PropertyGridStringEditorTemplate">
         <TextBox
+            MinHeight="0"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Center"
             primitives:TextEditorBehaviors.CommitOnEnter="True"
@@ -32,6 +33,7 @@
 
     <DataTemplate x:Key="PropertyGridMultilineStringEditorTemplate">
         <TextBox
+            MinHeight="0"
             HorizontalAlignment="Stretch"
             primitives:TextEditorBehaviors.SelectAllOnFocus="True"
             AcceptsReturn="True"
@@ -45,6 +47,7 @@
 
     <DataTemplate x:Key="PropertyGridPasswordEditorTemplate">
         <PasswordBox
+            MinHeight="0"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Center"
             BorderThickness="0"
@@ -59,6 +62,7 @@
 
     <DataTemplate x:Key="PropertyGridNumberEditorTemplate">
         <NumberBox
+            MinHeight="0"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Center"
             BorderThickness="0"
@@ -73,6 +77,7 @@
     -->
     <DataTemplate x:Key="PropertyGridLargeNumberEditorTemplate">
         <TextBox
+            MinHeight="0"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Center"
             primitives:TextEditorBehaviors.CommitOnEnter="True"
@@ -86,6 +91,7 @@
     <DataTemplate x:Key="PropertyGridBooleanEditorTemplate">
         <CheckBox
             MinWidth="0"
+            MinHeight="0"
             Margin="6,0,0,0"
             VerticalAlignment="Center"
             IsChecked="{Binding NullableBoolValue, Mode=TwoWay}"
@@ -95,6 +101,7 @@
     <DataTemplate x:Key="PropertyGridNullableBooleanEditorTemplate">
         <CheckBox
             MinWidth="0"
+            MinHeight="0"
             Margin="6,0,0,0"
             VerticalAlignment="Center"
             IsChecked="{Binding NullableBoolValue, Mode=TwoWay}"
@@ -104,6 +111,7 @@
 
     <DataTemplate x:Key="PropertyGridEnumEditorTemplate">
         <ComboBox
+            MinHeight="0"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Center"
             BorderThickness="0"
@@ -119,6 +127,7 @@
     -->
     <DataTemplate x:Key="PropertyGridFlagsEnumEditorTemplate">
         <DropDownButton
+            MinHeight="0"
             HorizontalAlignment="Stretch"
             HorizontalContentAlignment="Left"
             VerticalAlignment="Center"
@@ -145,6 +154,7 @@
 
     <DataTemplate x:Key="PropertyGridStandardValuesEditorTemplate">
         <ComboBox
+            MinHeight="0"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Center"
             BorderThickness="0"
@@ -156,11 +166,13 @@
     <DataTemplate x:Key="PropertyGridDateTimeEditorTemplate">
         <StackPanel Orientation="Horizontal" Spacing="4">
             <CalendarDatePicker
+                MinHeight="0"
                 VerticalAlignment="Center"
                 BorderThickness="0"
                 Date="{Binding DateValue, Mode=TwoWay}"
                 IsEnabled="{Binding IsEditable}" />
             <TimePicker
+                MinHeight="0"
                 VerticalAlignment="Center"
                 BorderThickness="0"
                 IsEnabled="{Binding IsEditable}"
@@ -170,6 +182,7 @@
 
     <DataTemplate x:Key="PropertyGridDateEditorTemplate">
         <CalendarDatePicker
+            MinHeight="0"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Center"
             BorderThickness="0"
@@ -179,6 +192,7 @@
 
     <DataTemplate x:Key="PropertyGridTimeEditorTemplate">
         <TimePicker
+            MinHeight="0"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Center"
             BorderThickness="0"
@@ -192,6 +206,7 @@
     -->
     <DataTemplate x:Key="PropertyGridTimeSpanEditorTemplate">
         <TextBox
+            MinHeight="0"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Center"
             primitives:TextEditorBehaviors.CommitOnEnter="True"
@@ -213,6 +228,7 @@
 
     <DataTemplate x:Key="PropertyGridStructEditorTemplate">
         <TextBox
+            MinHeight="0"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Center"
             primitives:TextEditorBehaviors.CommitOnEnter="True"

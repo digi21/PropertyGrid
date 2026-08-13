@@ -163,7 +163,19 @@
     </Style>
 
     <Style x:Key="DefaultPropertyGridRowPresenterStyle" TargetType="primitives:PropertyGridRowPresenter">
-        <Setter Property="Height" Value="{ThemeResource PropertyGridRowHeight}" />
+        <!--
+            MinHeight, not Height. A row has to be able to grow with an editor taller than a line -
+            a thumbnail, a wrapped note, a stack of buttons - and a fixed Height clips it silently.
+            There is no way to undo one from outside either: a Setter for a double does not parse
+            "Auto", so a consumer would have to copy this entire template to get rid of it.
+
+            Uniform rows still measure 28: the row panel asks its cells what they want and a
+            single-line editor wants a line. And StackLayout measures every row rather than
+            assuming they match, so virtualization is unaffected - verified with 400 rows in the
+            gallery's diagnose mode.
+        -->
+        <Setter Property="MinHeight" Value="{ThemeResource PropertyGridRowHeight}" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <!-- Rows take focus so the keyboard can reach them, and show where it is when it does. -->
         <Setter Property="IsTabStop" Value="True" />
@@ -280,7 +292,7 @@
     </Style>
 
     <Style x:Key="DefaultPropertyGridCategoryHeaderStyle" TargetType="primitives:PropertyGridCategoryHeader">
-        <Setter Property="Height" Value="{ThemeResource PropertyGridCategoryHeaderHeight}" />
+        <Setter Property="MinHeight" Value="{ThemeResource PropertyGridCategoryHeaderHeight}" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="IsTabStop" Value="True" />
         <Setter Property="UseSystemFocusVisuals" Value="True" />

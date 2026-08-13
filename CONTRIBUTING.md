@@ -80,6 +80,17 @@ Two rules keep the tests possible, and both are easy to break by accident:
   `PropertyGridThemeResources.Value<T>(key, fallback)` with a usable fallback**, because
   `Application.Current` is null in the designer and in tests.
 
+## Before you fight WinUI
+
+[docs/winui.md](docs/winui.md) collects the things that cost this library a bug, a crash or an
+afternoon: a dependency property called `Template` that markup silently never sets, a
+`{ThemeResource}` across dictionaries that takes the process down with no message, a null becoming
+`1/1/1926` in a date picker, editors that write their own empty state into your model before anyone
+touches them.
+
+None of it is guessable from the documentation and most of it fails quietly. Read it before
+concluding that something is impossible, and add to it when you find the next one.
+
 ## Code style
 
 `.editorconfig` carries the formatting rules, and the build treats warnings as errors, including

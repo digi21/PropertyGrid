@@ -112,6 +112,184 @@ public class ConsumerFeedbackTests
         Assert.Empty(source.FindRow("Count")!.StandardValues);
     }
 
+    // ---- an editor is chosen per property, not per type ----
+
+    [Fact]
+    public void GivesTwoPropertiesOfTheSameTypeDifferentEditors()
+    {
+        // Both are string. One has a list of its own and the other does not, and that has to be
+        // enough to tell them apart - it was not while resolution was memoized by declared type.
+        PropertyDescription coded = Coded("Tipo", new PropertyStandardValue(1, "Stop")) with { PropertyType = typeof(string) };
+        PropertyDescription plain = new() { Name = "Codigo", PropertyType = typeof(string), Accessor = new BagAccessor("Codigo") };
+
+        Assert.Equal(PropertyEditorKeys.StandardValues, BuiltInEditors.KeyFor(coded, null));
+        Assert.Equal(PropertyEditorKeys.String, BuiltInEditors.KeyFor(plain, null));
+    }
+
+    [Fact]
+    public void DoesNotLetWhicheverCameFirstDecideForTheRest()
+    {
+        PropertyDescription coded = Coded("Tipo", new PropertyStandardValue(1, "Stop")) with { PropertyType = typeof(string) };
+        PropertyDescription plain = new() { Name = "Codigo", PropertyType = typeof(string), Accessor = new BagAccessor("Codigo") };
+
+        // Same answers whichever order they are asked in.
+        string plainFirst = BuiltInEditors.KeyFor(plain, null);
+        string codedAfter = BuiltInEditors.KeyFor(coded, null);
+        string codedFirst = BuiltInEditors.KeyFor(coded, null);
+        string plainAfter = BuiltInEditors.KeyFor(plain, null);
+
+        Assert.Equal(plainFirst, plainAfter);
+        Assert.Equal(codedFirst, codedAfter);
+        Assert.NotEqual(plainFirst, codedFirst);
+    }
+
+    // ---- an editor being realized or recycled is not a user edit ----
+
+    [Fact]
+    public void IgnoresACombosNullSelectionWhenNoneWasNeverOnOffer()
+    {
+        // A combo box whose items are replaced resets its selection to null and pushes it through
+        // the two-way binding. That is the control correcting itself, not somebody choosing
+        // nothing - and the list has no empty entry to choose.
+        Dictionary<string, object?> record = new() { ["SignType"] = 1 };
+        PropertyGridSource source = new()
+        {
+            Provider = new DomainProvider([Coded("SignType", new PropertyStandardValue(1, "Stop"))]),
+        };
+        source.SetTarget(record);
+
+        source.FindRow("SignType")!.SelectedStandardValue = null;
+
+        Assert.Equal(1, record["SignType"]);
+    }
+
+    [Fact]
+    public void AcceptsANullSelectionWhenTheListOffersOne()
+    {
+        // Add an empty entry to a property that can actually hold nothing, and clearing becomes a
+        // real choice again.
+        Dictionary<string, object?> record = new() { ["SignType"] = 1 };
+        PropertyGridSource source = new()
+        {
+            Provider = new DomainProvider(
+            [
+                Coded("SignType", new PropertyStandardValue(null, "(none)"), new PropertyStandardValue(1, "Stop"))
+                    with
+                    { PropertyType = typeof(int?) },
+            ]),
+        };
+        source.SetTarget(record);
+        PropertyGridPropertyRow row = source.FindRow("SignType")!;
+
+        row.SelectedStandardValue = row.StandardValues[0];
+
+        Assert.Null(record["SignType"]);
+    }
+
+    [Fact]
+    public void WritesNothingToTheOldObjectWhenTheGridIsGivenAnother()
+    {
+        // The reported symptom: choose a value, switch tables, and the first one had been cleared.
+        Dictionary<string, object?> first = new() { ["SignType"] = 1 };
+        WritingAccessor accessor = new("SignType");
+        PropertyGridSource source = new()
+        {
+            Provider = new DomainProvider(
+            [
+                new PropertyDescription
+                {
+                    Name = "SignType",
+                    PropertyType = typeof(int),
+                    Accessor = accessor,
+                    StandardValues = [new PropertyStandardValue(1, "Stop")],
+                },
+            ]),
+        };
+        source.SetTarget(first);
+        accessor.Writes = 0;
+
+        source.SetTarget(new Dictionary<string, object?>());
+
+        Assert.Equal(0, accessor.Writes);
+        Assert.Equal(1, first["SignType"]);
+    }
+
+    [Fact]
+    public void KeepsATrueBooleanTrueWhenAFreshCheckBoxPushesItsEmptyState()
+    {
+        // A check box starts indeterminate and pushes null before it has been told what to show. On
+        // a plain bool that write cannot be honoured, and honouring it half way left the box showing
+        // a third state the model never had.
+        Booleans subject = new();
+        PropertyGridSource source = new();
+        source.SetTarget(subject);
+        PropertyGridPropertyRow row = source.FindRow("Revisada")!;
+
+        List<string?> announced = [];
+        row.PropertyChanged += (_, arguments) => announced.Add(arguments.PropertyName);
+
+        row.NullableBoolValue = null;
+
+        Assert.True(subject.Revisada);
+        Assert.True(row.NullableBoolValue);
+
+        // And the box is told to read again, or it would keep showing the empty state for good.
+        Assert.Contains(nameof(PropertyGridPropertyRow.NullableBoolValue), announced);
+    }
+
+    [Fact]
+    public void StillLetsANullableBooleanBeCleared()
+    {
+        Booleans subject = new() { Maybe = true };
+        PropertyGridSource source = new();
+        source.SetTarget(subject);
+
+        source.FindRow("Maybe")!.NullableBoolValue = null;
+
+        Assert.Null(subject.Maybe);
+    }
+
+    [Fact]
+    public void KeepsANumberWhenAFreshNumberBoxPushesNotANumber()
+    {
+        Booleans subject = new() { Count = 7 };
+        PropertyGridSource source = new();
+        source.SetTarget(subject);
+        PropertyGridPropertyRow row = source.FindRow("Count")!;
+
+        row.DoubleValue = double.NaN;
+
+        Assert.Equal(7, subject.Count);
+        Assert.False(row.HasErrors);
+    }
+
+    private sealed class Booleans
+    {
+        public bool Revisada { get; set; } = true;
+
+        public bool? Maybe { get; set; }
+
+        public int Count { get; set; }
+    }
+
+    private sealed class WritingAccessor(string name) : PropertyAccessor
+    {
+        internal int Writes { get; set; }
+
+        public override bool CanRead => true;
+
+        public override bool CanWrite => true;
+
+        protected override object? GetValueCore(object target) =>
+            ((Dictionary<string, object?>)target).TryGetValue(name, out object? value) ? value : null;
+
+        protected override void SetValueCore(object target, object? value)
+        {
+            Writes++;
+            ((Dictionary<string, object?>)target)[name] = value;
+        }
+    }
+
     // ---- what must not break ----
 
     [Fact]

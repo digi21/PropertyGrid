@@ -12,19 +12,23 @@ namespace Digi21.WinUI.PropertyGrid;
 /// </remarks>
 public partial class PropertyEditorSelector : DataTemplateSelector
 {
-    private readonly Dictionary<CacheKey, DataTemplate?> cache = [];
-
     /// <summary>Gets or sets the editors registered on the grid this selector belongs to.</summary>
     public PropertyEditorTemplateMap? EditorTemplates { get; set; }
 
     internal PropertyGrid? Owner { get; set; }
 
-    /// <summary>Forgets the editors it resolved, so the next row asks again.</summary>
+    /// <summary>Does nothing, and is kept so that calling it stays harmless.</summary>
     /// <remarks>
-    /// Resolution depends on what is registered and on what the application's resources hold, and
-    /// neither of those is watched. Anything changing them has to say so.
+    /// Resolution used to be memoized and is not any more. The key was the declared type, the
+    /// runtime type and the requested name, and that stopped identifying an editor the moment a
+    /// single property could carry its own list of values or its own <c>[FilePath]</c>: two strings
+    /// in the same object would resolve once and share the answer, so whichever came first decided
+    /// for the other. Resolving is a handful of type comparisons and a dictionary lookup, run once
+    /// per row realized, so there was nothing worth the hazard.
     /// </remarks>
-    public void Invalidate() => cache.Clear();
+    public void Invalidate()
+    {
+    }
 
     /// <inheritdoc />
     protected override DataTemplate? SelectTemplateCore(object item) => Select(item);
@@ -39,22 +43,9 @@ public partial class PropertyEditorSelector : DataTemplateSelector
             return null;
         }
 
-        // The event is raised before anything else and is never cached: it exists so a consumer can
-        // decide per row, using knowledge the type system does not carry.
-        if (Owner?.RaiseEditorSelecting(row) is { } chosen)
-        {
-            return chosen;
-        }
-
-        CacheKey key = new(row.Description.EditorKey, row.PropertyType, row.RuntimeType);
-        if (cache.TryGetValue(key, out DataTemplate? cached))
-        {
-            return cached;
-        }
-
-        DataTemplate? resolved = Resolve(row);
-        cache[key] = resolved;
-        return resolved;
+        // The event comes first: it exists so a consumer can decide per row, using knowledge the
+        // type system does not carry.
+        return Owner?.RaiseEditorSelecting(row) ?? Resolve(row);
     }
 
     private DataTemplate? Resolve(PropertyGridPropertyRow row)
@@ -83,6 +74,4 @@ public partial class PropertyEditorSelector : DataTemplateSelector
         return PropertyGridThemeResources.Template(builtIn)
             ?? PropertyGridThemeResources.Template(PropertyEditorKeys.ReadOnly);
     }
-
-    private readonly record struct CacheKey(string? EditorKey, Type PropertyType, Type? RuntimeType);
 }

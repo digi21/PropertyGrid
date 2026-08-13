@@ -160,14 +160,32 @@ public sealed class PropertyGridPropertyRow : PropertyGridRow
     public double DoubleValue
     {
         get => value is IConvertible convertible ? SafeToDouble(convertible) : double.NaN;
-        set => TryWrite(double.IsNaN(value) ? null : value);
+        set
+        {
+            if (double.IsNaN(value) && !AcceptsNull)
+            {
+                RejectEditorDefault();
+                return;
+            }
+
+            TryWrite(double.IsNaN(value) ? null : value);
+        }
     }
 
     /// <summary>Gets or sets the value as a three-state flag, for the check box editors.</summary>
     public bool? NullableBoolValue
     {
         get => value as bool?;
-        set => TryWrite(value);
+        set
+        {
+            if (value is null && !AcceptsNull)
+            {
+                RejectEditorDefault();
+                return;
+            }
+
+            TryWrite(value);
+        }
     }
 
     /// <summary>Gets or sets the value as a date, for the calendar editors.</summary>
@@ -218,7 +236,16 @@ public sealed class PropertyGridPropertyRow : PropertyGridRow
             return null;
         }
 
-        set => TryWrite(value?.Value);
+        set
+        {
+            if (value is null && !OffersNull(EnumMembers.Select(member => member.Value)))
+            {
+                RejectEditorDefault();
+                return;
+            }
+
+            TryWrite(value?.Value);
+        }
     }
 
     /// <summary>Gets the flags to tick when the property is a <see cref="FlagsAttribute"/> enumeration, or an empty list.</summary>
@@ -247,7 +274,16 @@ public sealed class PropertyGridPropertyRow : PropertyGridRow
             return null;
         }
 
-        set => TryWrite(value?.Value);
+        set
+        {
+            if (value is null && !OffersNull(StandardValues.Select(standard => standard.Value)))
+            {
+                RejectEditorDefault();
+                return;
+            }
+
+            TryWrite(value?.Value);
+        }
     }
 
     /// <summary>Gets a value indicating whether the value differs from the one the property declares as its default.</summary>
@@ -376,6 +412,37 @@ public sealed class PropertyGridPropertyRow : PropertyGridRow
             SetErrors(reported);
         }
     }
+
+    // Whether the property can hold nothing at all: a reference, or a Nullable<T>.
+    private bool AcceptsNull =>
+        !PropertyType.IsValueType || Nullable.GetUnderlyingType(PropertyType) is not null;
+
+    // Whether "nothing" is one of the things the user was offered. A list with no empty entry means
+    // a null coming out of the control cannot have been chosen.
+    private static bool OffersNull(IEnumerable<object?> offered)
+    {
+        foreach (object? candidate in offered)
+        {
+            if (candidate is null)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // A control that has just been created, or recycled onto another row, pushes its own empty state
+    // through its two-way binding before it has been told what to show: a combo box whose items were
+    // replaced resets its selection to null, and a fresh check box starts indeterminate. That is not
+    // the user clearing anything, and writing it would either erase the value or - when the property
+    // refuses null - leave the control showing something the model never held.
+    //
+    // So the write is dropped and the control is told to read again, which snaps it back to the
+    // truth. Without the second half the control keeps showing its empty state for good, because a
+    // rejected write changes nothing for it to notice.
+    private void RejectEditorDefault([System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null) =>
+        RaisePropertyChanged(propertyName);
 
     private static double SafeToDouble(IConvertible convertible)
     {

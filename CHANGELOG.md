@@ -75,6 +75,20 @@ API can still change. Builds before the tag are published as `0.1.0-dev.N`.
 - A property declared as `object` and holding a string was given the read-only complex editor,
   because a string has properties of its own. A property declared vaguely now resolves its editor
   from the type of the value it holds.
+- Two properties of the same type could not have different editors. Resolution was memoized by
+  declared type, runtime type and requested name, and that stopped identifying an editor as soon as
+  a single property could carry its own list of values or its own `[FilePath]`: whichever string
+  resolved first decided for every other string in the object. The memoization is gone — resolving
+  is a handful of type comparisons run once per row realized.
+- An editor being realized or recycled wrote its own empty state into the model. A combo box whose
+  items are replaced resets its selection to null and pushes it through the two-way binding, so
+  switching objects cleared the value on the one being left behind. A null now reaches the model
+  only when nothing is a choice the list actually offered, and the control is told to read again so
+  it does not sit there showing an empty state.
+- A `bool` holding true was drawn as an indeterminate check box. Same cause seen from the other
+  side: the box pushed null on creation, the write was refused because a `bool` cannot be cleared,
+  and nothing then told the box to go and read the real value. The same guard now covers a number
+  box pushing `NaN`.
 - `PropertyEditorTemplateMap`, registering an editor for a type, an interface and its
   implementations, or a name a property asks for.
 - Replacing a whole category of editors by redeclaring a `DataTemplate` under a

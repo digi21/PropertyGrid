@@ -144,6 +144,23 @@ PropertyGridStrings.WholeNumberName = Loc("número entero");
 Set them once, early. `PropertyGrid.Culture` and `PropertyGrid.DefaultCategoryName` are per grid,
 for an application that chooses its own language rather than following Windows.
 
+> **Do it in `OnLaunched`, not in the `App` constructor.** Reading
+> `Application.Current.Resources` from the constructor throws `COMException 0x8000FFFF`: the
+> dictionary does not exist yet, because `InitializeComponent` only records where it comes from.
+> The process dies before the first window appears and says nothing about why, which makes it an
+> expensive mistake to debug — and the constructor is the obvious place to put this.
+
+```csharp
+protected override void OnLaunched(LaunchActivatedEventArgs args)
+{
+    PropertyGridStrings.DefaultCategoryName = Loc("Varios");
+    Resources["PropertyGridSearchPlaceholderText"] = Loc("Buscar propiedades");
+
+    window = new MainWindow();
+    window.Activate();
+}
+```
+
 ## Icons and text
 
 Glyphs come from the symbol font, so they follow the shell rather than shipping as assets:

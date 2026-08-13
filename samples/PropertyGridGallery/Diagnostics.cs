@@ -152,6 +152,10 @@ internal sealed class Diagnostics
 
     private void Record(string stage)
     {
+        // Nobody typed anything, so any write at all is an editor pushing its own empty state into
+        // the model as it is realized or recycled - which is how a value gets silently erased.
+        report.AppendLine($"writes into the model so far: {BagAccessor.Writes}");
+
         int realized = 0;
         int withEditor = 0;
 
@@ -236,6 +240,10 @@ internal sealed class Diagnostics
             reusedInnerEditors > 0
                 ? $"CONTENT PRESENTER KEEPS ITS TREE: {reusedInnerEditors} recycles reused the inner editor."
                 : "CONTENT PRESENTER REBUILDS: no recycle reused its inner editor.");
+        report.AppendLine(
+            BagAccessor.Writes == 0
+                ? "NO WRITES FROM SCROLLING: realizing and recycling rows left the model alone."
+                : $"ROWS WROTE TO THE MODEL: {BagAccessor.Writes} writes with nobody typing.");
 
         File.WriteAllText(outputPath, report.ToString());
         window.Close();
@@ -313,6 +321,11 @@ internal sealed class SyntheticProvider(int count) : IPropertyDescriptionProvide
             // Every tenth one is multi-line, so the report shows both a dense row and a grown one.
             bool tall = index % 10 == 3;
 
+            // And every seventh carries its own list of values, so the combo box those produce is
+            // recycled along with everything else. That is the control that used to write null into
+            // the model as its items were replaced.
+            bool coded = index % 7 == 2 && propertyType == typeof(string);
+
             properties.Add(new PropertyDescription
             {
                 Name = name,
@@ -322,6 +335,13 @@ internal sealed class SyntheticProvider(int count) : IPropertyDescriptionProvide
                 CategoryName = $"Group {index / 25:D2}",
                 HelpText = $"Synthetic property number {index}.",
                 EditorKey = tall ? PropertyEditorKeys.MultilineString : null,
+                StandardValues = coded
+                    ?
+                    [
+                        new PropertyStandardValue(name, "Chosen"),
+                        new PropertyStandardValue(name + "-other", "The other one"),
+                    ]
+                    : null,
             });
         }
 
@@ -347,8 +367,12 @@ internal sealed class BagAccessor(string name, Type propertyType, bool tall = fa
                 ? tall ? name + "\r\nsecond line\r\nthird line" : name
                 : Activator.CreateInstance(propertyType);
 
+    internal static int Writes { get; private set; }
+
     protected override void SetValueCore(object target, object? value)
     {
+        Writes++;
+
         if (target is SyntheticBag bag)
         {
             bag.Values[name] = value;

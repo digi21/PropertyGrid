@@ -1,8 +1,8 @@
-<img src="https://raw.githubusercontent.com/Digi21/PropertyGrid/main/assets/icon-256.png" width="96" alt="" />
+<img src="https://raw.githubusercontent.com/digi21/PropertyGrid/main/assets/icon-256.png" width="96" alt="" />
 
 # Digi21.WinUI.PropertyGrid
 
-[![CI](https://github.com/Digi21/PropertyGrid/actions/workflows/ci.yml/badge.svg)](https://github.com/Digi21/PropertyGrid/actions/workflows/ci.yml)
+[![CI](https://github.com/digi21/PropertyGrid/actions/workflows/ci.yml/badge.svg)](https://github.com/digi21/PropertyGrid/actions/workflows/ci.yml)
 [![NuGet](https://img.shields.io/nuget/v/Digi21.WinUI.PropertyGrid.svg)](https://www.nuget.org/packages/Digi21.WinUI.PropertyGrid)
 [![Downloads](https://img.shields.io/nuget/dt/Digi21.WinUI.PropertyGrid.svg)](https://www.nuget.org/packages/Digi21.WinUI.PropertyGrid)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -11,7 +11,7 @@ A property grid for WinUI 3. Point it at an object and it lists the object's pro
 rows: an editor chosen from each property's type, grouped into categories, labelled from the
 attributes already on your model, validated, and kept in step with the object as it changes.
 
-<img src="https://raw.githubusercontent.com/Digi21/PropertyGrid/main/assets/gallery.png" width="820" alt="The gallery, showing categories, editors and a nested object" />
+<img src="https://raw.githubusercontent.com/digi21/PropertyGrid/main/assets/gallery.png" width="820" alt="The gallery, showing categories, editors and a nested object" />
 
 ## Features
 
@@ -160,7 +160,7 @@ public int Opacity { get; set; }
 
 To replace a whole category of editors rather than the one for a type, declare a `DataTemplate`
 under the matching name from `PropertyEditorKeys` in your `App.xaml` — every boolean in the
-application changes at once. See [docs/editors.md](https://github.com/Digi21/PropertyGrid/blob/main/docs/editors.md).
+application changes at once. See [docs/editors.md](https://github.com/digi21/PropertyGrid/blob/main/docs/editors.md).
 
 ### Theming
 
@@ -171,7 +171,7 @@ themes and high contrast on its own. Redeclare a key to change one:
 <SolidColorBrush x:Key="PropertyGridCategoryBackgroundBrush" Color="#20FFFFFF" />
 ```
 
-See [docs/theming.md](https://github.com/Digi21/PropertyGrid/blob/main/docs/theming.md) for the full
+See [docs/theming.md](https://github.com/digi21/PropertyGrid/blob/main/docs/theming.md) for the full
 list, the metrics, and how to retemplate a control.
 
 ### Types you do not own
@@ -185,7 +185,7 @@ PropertyGridMetadata.Default
 
 Or handle `AutoGeneratingProperty` per grid, or replace discovery entirely with an
 `IPropertyDescriptionProvider` when the properties are not CLR properties at all. See
-[docs/metadata.md](https://github.com/Digi21/PropertyGrid/blob/main/docs/metadata.md).
+[docs/metadata.md](https://github.com/digi21/PropertyGrid/blob/main/docs/metadata.md).
 
 ## Not in this version
 
@@ -207,8 +207,8 @@ dotnet run --project samples/PropertyGridGallery
 ## Contributing
 
 Issues and pull requests are welcome — see
-[CONTRIBUTING.md](https://github.com/Digi21/PropertyGrid/blob/main/CONTRIBUTING.md).
+[CONTRIBUTING.md](https://github.com/digi21/PropertyGrid/blob/main/CONTRIBUTING.md).
 
 ## License
 
-[MIT](https://github.com/Digi21/PropertyGrid/blob/main/LICENSE)
+[MIT](https://github.com/digi21/PropertyGrid/blob/main/LICENSE)

@@ -144,6 +144,9 @@ PropertyGridStrings.WholeNumberName = Loc("número entero");
 Set them once, early. `PropertyGrid.Culture` and `PropertyGrid.DefaultCategoryName` are per grid,
 for an application that chooses its own language rather than following Windows.
 
+[localisation.md](localisation.md) has all of this translated into nine languages, contributed by an
+application that ships in them.
+
 > **Do it in `OnLaunched`, not in the `App` constructor.** Reading
 > `Application.Current.Resources` from the constructor throws `COMException 0x8000FFFF`: the
 > dictionary does not exist yet, because `InitializeComponent` only records where it comes from.

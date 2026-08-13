@@ -179,6 +179,13 @@ themes and high contrast on its own. Redeclare a key to change one:
 See [docs/theming.md](https://github.com/digi21/PropertyGrid/blob/main/docs/theming.md) for the full
 list, the metrics, and how to retemplate a control.
 
+### Other languages
+
+Every word the grid shows is either a resource key you redeclare or a property on
+`PropertyGridStrings`. [docs/localisation.md](https://github.com/digi21/PropertyGrid/blob/main/docs/localisation.md)
+has the lot translated into Catalan, English, Basque, French, Galician, German, Italian, Portuguese
+and Spanish.
+
 ### Types you do not own
 
 ```csharp

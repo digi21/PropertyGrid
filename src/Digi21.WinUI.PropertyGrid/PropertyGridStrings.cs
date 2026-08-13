@@ -29,11 +29,11 @@ public static class PropertyGridStrings
     /// <summary>Gets or sets the category properties land in when they do not name one.</summary>
     public static string DefaultCategoryName { get; set; } = "Misc";
 
-    /// <summary>Gets or sets what is shown where several objects disagree about a value.</summary>
-    public static string MultipleValues { get; set; } = "(multiple values)";
-
-    /// <summary>Gets or sets what is shown for a value that is not set.</summary>
-    public static string NullValue { get; set; } = "(none)";
+    // Deliberately absent: a string for "several objects disagree" and one for "not set". Both were
+    // declared before anything used them, and public API that never reaches the screen is worse than
+    // none - it is a translator's afternoon spent on nothing. The first comes back with multiple
+    // selection; the second when a summary cell has somewhere to put it that is not the text a user
+    // edits.
 
     /// <summary>Gets or sets the reason given when text cannot be read as the property's type. Takes the text and the type name.</summary>
     public static string NotAValidFormat { get; set; } = "'{0}' is not a valid {1}.";

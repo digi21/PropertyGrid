@@ -47,6 +47,7 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <Slider
                                     Maximum="100"
@@ -57,6 +58,19 @@
                                     Grid.Column="1"
                                     VerticalAlignment="Center"
                                     Text="{Binding Text}" />
+
+                                <!--
+                                    A handler in an editor template. The library's own templates
+                                    cannot do this - a DataTemplate in a resource dictionary has no
+                                    code behind it - but an application's can, because this one is
+                                    in the namescope of a page that does.
+                                -->
+                                <Button
+                                    Grid.Column="2"
+                                    Margin="8,0,0,0"
+                                    Padding="6,0,6,0"
+                                    Click="OnResetOpacity"
+                                    Content="Reset" />
                             </Grid>
                         </DataTemplate>
                     </pg:PropertyEditorTemplate>

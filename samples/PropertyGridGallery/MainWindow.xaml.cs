@@ -104,6 +104,17 @@ public sealed partial class MainWindow : Window
 
     internal void ToggleThemeForPicture() => OnToggleTheme(this, new RoutedEventArgs());
 
+    // Reached from a Click in the editor template above. The data context of an editor template is
+    // the row, so the button knows which property it belongs to without being told.
+    private void OnResetOpacity(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: PropertyGridPropertyRow row })
+        {
+            row.Value = 80;
+            Trace.Text = $"Reset {row.DisplayName} from a button inside its editor.";
+        }
+    }
+
     private static IReadOnlyList<string> Extensions(PropertyGridBrowseRequestedEventArgs arguments) =>
         arguments.Extensions.Count > 0 ? arguments.Extensions : ["*"];
 

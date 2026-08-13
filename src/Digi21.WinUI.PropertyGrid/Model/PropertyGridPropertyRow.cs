@@ -1,0 +1,510 @@
+using System.ComponentModel;
+
+namespace Digi21.WinUI.PropertyGrid;
+
+/// <summary>One property of an object, as a <see cref="PropertyGrid"/> shows and edits it.</summary>
+/// <remarks>
+/// <para>
+/// Editor templates bind the typed properties on this row — <see cref="Text"/>,
+/// <see cref="DoubleValue"/>, <see cref="SelectedEnumMember"/> and the rest — rather than binding
+/// <see cref="Value"/> through a value converter. A converter cannot see the declared type, has
+/// nowhere useful to report a bad parse, and would have to be written once per pair of editor and
+/// type. These funnel every write through one place that knows the type, the culture and the
+/// validation attributes.
+/// </para>
+/// <para>
+/// An edit that fails to convert or validate leaves the typed text in the editor and the old value
+/// on the object. Both halves matter: throwing the text away loses the user's work, and writing the
+/// value anyway defeats the validation.
+/// </para>
+/// </remarks>
+public sealed class PropertyGridPropertyRow : PropertyGridRow
+{
+    private readonly List<PropertyGridRow> children = [];
+    private readonly List<string> errors = [];
+    private object? value;
+    private string text = string.Empty;
+    private bool isExpandable;
+    private bool childrenBuilt;
+    private bool writing;
+
+    internal PropertyGridPropertyRow(
+        PropertyGridSource source,
+        PropertyDescription description,
+        object target,
+        string key,
+        int depth,
+        PropertyGridCategoryRow? category,
+        PropertyGridPropertyRow? parent)
+        : base(source, key, depth)
+    {
+        Description = description;
+        Target = target;
+        Category = category;
+        Parent = parent;
+
+        ReadFromTarget();
+    }
+
+    /// <summary>Gets what the grid knows about the property before reading it.</summary>
+    public PropertyDescription Description { get; }
+
+    /// <summary>Gets the object the property is read from and written to.</summary>
+    public object Target { get; }
+
+    /// <summary>Gets the category header the row sits under, if the grid is showing categories.</summary>
+    public PropertyGridCategoryRow? Category { get; }
+
+    /// <summary>Gets the row whose value this property belongs to, or <see langword="null"/> at the top level.</summary>
+    public PropertyGridPropertyRow? Parent { get; }
+
+    /// <summary>Gets the name of the property as it is declared in code.</summary>
+    public string Name => Description.Name;
+
+    /// <inheritdoc />
+    public override string DisplayName => Description.DisplayName;
+
+    /// <summary>Gets the sentence explaining the property, shown in the description pane.</summary>
+    public string? HelpText => Description.HelpText;
+
+    /// <summary>Gets the declared type of the property, which is what decides its editor.</summary>
+    public Type PropertyType => Description.PropertyType;
+
+    /// <summary>Gets the type of the value the property currently holds, which can be more specific than <see cref="PropertyType"/>.</summary>
+    public Type? RuntimeType => value?.GetType();
+
+    /// <summary>Gets a value indicating whether the grid refuses to write the property.</summary>
+    public bool IsReadOnly => Description.IsReadOnly || Source.IsReadOnly || !Description.Accessor.CanWrite;
+
+    /// <summary>Gets a value indicating whether the editor accepts input, which is the opposite of <see cref="IsReadOnly"/>.</summary>
+    public bool IsEditable => !IsReadOnly;
+
+    /// <summary>Gets or sets the value of the property.</summary>
+    /// <remarks>
+    /// Setting this runs the whole write path: coercion to the declared type, the validators, the
+    /// cancellable value-changing event, the write itself, and then a re-read, because a setter is
+    /// free to store something other than what it was handed.
+    /// </remarks>
+    public object? Value
+    {
+        get => value;
+        set => TryWrite(value);
+    }
+
+    /// <summary>Gets or sets the value of the property as text, in the grid's culture.</summary>
+    public string Text
+    {
+        get => text;
+        set
+        {
+            if (string.Equals(text, value, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            text = value ?? string.Empty;
+            RaisePropertyChanged();
+
+            if (IsReadOnly)
+            {
+                return;
+            }
+
+            if (PropertyValueConverter.TryParse(text, PropertyType, Source.Culture, out object? parsed, out string? error))
+            {
+                TryWrite(parsed);
+            }
+            else
+            {
+                SetErrors(error is null ? [] : [error]);
+            }
+        }
+    }
+
+    /// <summary>Gets or sets the value as a number, for the editors backed by a number box.</summary>
+    /// <remarks>
+    /// A number box works in doubles, so <see cref="long"/>, <see cref="ulong"/> and
+    /// <see cref="decimal"/> lose precision past 2^53 and are given a text editor instead. Nothing
+    /// stops this property from being read for them; the editor resolution is what keeps it from
+    /// happening.
+    /// </remarks>
+    public double DoubleValue
+    {
+        get => value is IConvertible convertible ? SafeToDouble(convertible) : double.NaN;
+        set => TryWrite(double.IsNaN(value) ? null : value);
+    }
+
+    /// <summary>Gets or sets the value as a three-state flag, for the check box editors.</summary>
+    public bool? NullableBoolValue
+    {
+        get => value as bool?;
+        set => TryWrite(value);
+    }
+
+    /// <summary>Gets or sets the value as a date, for the calendar editors.</summary>
+    public DateTimeOffset? DateValue
+    {
+        get => value switch
+        {
+            DateTimeOffset offset => offset,
+            DateTime moment => new DateTimeOffset(moment.Kind == DateTimeKind.Unspecified
+                ? DateTime.SpecifyKind(moment, DateTimeKind.Local)
+                : moment),
+            DateOnly date => new DateTimeOffset(date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Local)),
+            _ => null,
+        };
+        set => TryWrite(value is null ? null : FromDate(value.Value));
+    }
+
+    /// <summary>Gets or sets the time of day part of the value, for the clock editors.</summary>
+    public TimeSpan? TimeValue
+    {
+        get => value switch
+        {
+            TimeSpan span => span,
+            TimeOnly time => time.ToTimeSpan(),
+            DateTimeOffset offset => offset.TimeOfDay,
+            DateTime moment => moment.TimeOfDay,
+            _ => null,
+        };
+        set => TryWrite(value is null ? null : FromTime(value.Value));
+    }
+
+    /// <summary>Gets the members to choose from when the property is an enumeration, or an empty list.</summary>
+    public IReadOnlyList<EnumMemberRow> EnumMembers { get; private set; } = [];
+
+    /// <summary>Gets or sets the chosen member when the property is an enumeration.</summary>
+    public EnumMemberRow? SelectedEnumMember
+    {
+        get
+        {
+            foreach (EnumMemberRow member in EnumMembers)
+            {
+                if (Equals(member.Value, value))
+                {
+                    return member;
+                }
+            }
+
+            return null;
+        }
+
+        set => TryWrite(value?.Value);
+    }
+
+    /// <summary>Gets the flags to tick when the property is a <see cref="FlagsAttribute"/> enumeration, or an empty list.</summary>
+    public IReadOnlyList<FlagMemberRow> FlagMembers { get; private set; } = [];
+
+    /// <summary>Gets a value indicating whether the value differs from the one the property declares as its default.</summary>
+    public bool IsModified => Description.HasDefaultValue && !Equals(value, Description.DefaultValue);
+
+    /// <summary>Gets a value indicating whether the value can be put back to the declared default.</summary>
+    public bool CanResetValue => !IsReadOnly && IsModified;
+
+    /// <summary>Gets a value indicating whether the last edit was rejected.</summary>
+    public bool HasErrors => errors.Count > 0;
+
+    /// <summary>Gets the first thing wrong with the value, or <see langword="null"/> if nothing is.</summary>
+    public string? ErrorMessage => errors.Count > 0 ? errors[0] : null;
+
+    /// <summary>Gets everything wrong with the value.</summary>
+    public IReadOnlyList<string> Errors => errors;
+
+    /// <inheritdoc />
+    public override bool IsExpandable => isExpandable;
+
+    /// <summary>Gets the rows shown underneath this one when it is open.</summary>
+    public IReadOnlyList<PropertyGridRow> Children => children;
+
+    /// <summary>Puts the value back to the one the property declares as its default.</summary>
+    public void ResetValue()
+    {
+        if (CanResetValue)
+        {
+            TryWrite(Description.DefaultValue);
+        }
+    }
+
+    /// <summary>Reads the value from the object again, discarding any rejected edit.</summary>
+    public void Refresh()
+    {
+        ReadFromTarget();
+        RaiseValueChanged();
+    }
+
+    internal void ReadFromTarget()
+    {
+        if (Description.Accessor.TryGetValue(Target, out object? read, out Exception? failure))
+        {
+            value = read;
+            errors.Clear();
+        }
+        else
+        {
+            // A getter that throws is one broken row, not a broken window. The row shows why and
+            // refuses to be edited, and every other property of the object still works.
+            value = null;
+            errors.Clear();
+            errors.Add(failure?.Message ?? string.Empty);
+        }
+
+        text = PropertyValueConverter.ToText(value, Source.Culture);
+        RefreshChoices();
+        RefreshExpandability();
+        CollectTargetErrors();
+    }
+
+    internal void RefreshExpandability()
+    {
+        bool expandable = Source.CanExpand(this, value);
+        if (isExpandable == expandable)
+        {
+            return;
+        }
+
+        isExpandable = expandable;
+        RaisePropertyChanged(nameof(IsExpandable));
+
+        if (!expandable)
+        {
+            SetExpandedQuietly(false);
+            InvalidateChildren();
+        }
+    }
+
+    internal void EnsureChildren()
+    {
+        if (childrenBuilt)
+        {
+            return;
+        }
+
+        childrenBuilt = true;
+        children.Clear();
+        if (value is not null)
+        {
+            children.AddRange(Source.BuildChildren(this, value));
+        }
+    }
+
+    internal void InvalidateChildren()
+    {
+        childrenBuilt = false;
+        children.Clear();
+    }
+
+    internal void CollectTargetErrors()
+    {
+        if (!Source.ValidationMode.HasFlag(PropertyGridValidationMode.DataErrorInfo)
+            || Target is not INotifyDataErrorInfo reporter)
+        {
+            return;
+        }
+
+        // Whatever the object says wins: its setter has already run and may have applied a rule the
+        // grid has no way to see.
+        List<string> reported = [];
+        System.Collections.IEnumerable? entries = reporter.GetErrors(Name);
+        if (entries is not null)
+        {
+            foreach (object? entry in entries)
+            {
+                if (entry is not null)
+                {
+                    reported.Add(entry.ToString() ?? string.Empty);
+                }
+            }
+        }
+
+        if (reported.Count > 0 || errors.Count > 0)
+        {
+            SetErrors(reported);
+        }
+    }
+
+    private static double SafeToDouble(IConvertible convertible)
+    {
+        try
+        {
+            return convertible.ToDouble(null);
+        }
+        catch (Exception exception) when (exception is FormatException or InvalidCastException or OverflowException)
+        {
+            return double.NaN;
+        }
+    }
+
+    private bool TryWrite(object? proposed)
+    {
+        // Editors write back while the grid is pushing a value into them, and a target that raises
+        // its own change notification writes back again. Without this the round trip never settles.
+        if (writing || IsReadOnly)
+        {
+            return false;
+        }
+
+        if (!PropertyValueConverter.TryCoerce(proposed, PropertyType, Source.Culture, out object? coerced, out string? conversionError))
+        {
+            SetErrors(conversionError is null ? [] : [conversionError]);
+            return false;
+        }
+
+        if (Equals(coerced, value))
+        {
+            SetErrors([]);
+            return true;
+        }
+
+        IReadOnlyList<string> rejections = PropertyValidationRunner.Validate(this, coerced);
+        if (rejections.Count > 0)
+        {
+            SetErrors(rejections);
+            return false;
+        }
+
+        object? previous = value;
+        if (!Source.OnValueChanging(this, previous, coerced, out string? veto))
+        {
+            SetErrors(veto is null ? [] : [veto]);
+            return false;
+        }
+
+        writing = true;
+        try
+        {
+            if (!Description.Accessor.TrySetValue(Target, coerced, out Exception? failure))
+            {
+                SetErrors([failure?.Message ?? string.Empty]);
+                return false;
+            }
+
+            // The setter is free to store something other than what it was handed - clamping a
+            // number, normalising a path - and the row has to show what was actually kept.
+            ReadFromTarget();
+        }
+        finally
+        {
+            writing = false;
+        }
+
+        RaiseValueChanged();
+        Source.OnValueChanged(this, previous, value);
+        return true;
+    }
+
+    private object? FromDate(DateTimeOffset chosen) => PropertyType switch
+    {
+        _ when KnownTypes.Unwrap(PropertyType) == typeof(DateOnly) => DateOnly.FromDateTime(chosen.LocalDateTime),
+        _ when KnownTypes.Unwrap(PropertyType) == typeof(DateTime) => Combine(chosen.LocalDateTime),
+        _ => chosen,
+    };
+
+    private object? FromTime(TimeSpan chosen) => KnownTypes.Unwrap(PropertyType) switch
+    {
+        Type type when type == typeof(TimeOnly) => TimeOnly.FromTimeSpan(chosen),
+        Type type when type == typeof(TimeSpan) => chosen,
+        Type type when type == typeof(DateTime) => (value as DateTime? ?? DateTime.Today).Date + chosen,
+        Type type when type == typeof(DateTimeOffset) =>
+            new DateTimeOffset((value as DateTimeOffset? ?? DateTimeOffset.Now).Date + chosen),
+        _ => chosen,
+    };
+
+    // The calendar only picks a day, so the time already on the value has to survive being edited.
+    private DateTime Combine(DateTime chosen) => value is DateTime existing
+        ? chosen.Date + existing.TimeOfDay
+        : chosen;
+
+    private void RefreshChoices()
+    {
+        Type underlying = KnownTypes.Unwrap(PropertyType);
+        if (!underlying.IsEnum)
+        {
+            return;
+        }
+
+        if (EnumMembers.Count == 0)
+        {
+            EnumMembers = EnumInfo.MembersOf(underlying);
+
+            if (EnumInfo.IsFlags(underlying))
+            {
+                List<FlagMemberRow> flags = [];
+                foreach (EnumMemberRow member in EnumMembers)
+                {
+                    ulong bits = EnumInfo.BitsOf(member.Value);
+
+                    // The zero member of a flags enumeration is "none", not a flag: showing it as a
+                    // tick box that can never be ticked off is worse than not showing it.
+                    if (bits != 0)
+                    {
+                        FlagMemberRow flag = new(member, bits);
+                        flag.Toggled += OnFlagToggled;
+                        flags.Add(flag);
+                    }
+                }
+
+                FlagMembers = flags;
+            }
+        }
+
+        if (FlagMembers.Count > 0)
+        {
+            ulong current = value is null ? 0UL : EnumInfo.BitsOf(value);
+            foreach (FlagMemberRow flag in FlagMembers)
+            {
+                flag.SetCheckedQuietly((current & flag.Bits) == flag.Bits);
+            }
+        }
+    }
+
+    private void OnFlagToggled(object? sender, EventArgs arguments)
+    {
+        if (writing)
+        {
+            return;
+        }
+
+        ulong bits = 0;
+        foreach (FlagMemberRow flag in FlagMembers)
+        {
+            if (flag.IsChecked)
+            {
+                bits |= flag.Bits;
+            }
+        }
+
+        Type underlying = KnownTypes.Unwrap(PropertyType);
+        TryWrite(Enum.ToObject(underlying, unchecked((long)bits)));
+    }
+
+    private void SetErrors(IReadOnlyList<string> replacement)
+    {
+        if (errors.Count == replacement.Count && errors.SequenceEqual(replacement, StringComparer.Ordinal))
+        {
+            return;
+        }
+
+        errors.Clear();
+        errors.AddRange(replacement);
+        RaisePropertyChanged(nameof(Errors));
+        RaisePropertyChanged(nameof(HasErrors));
+        RaisePropertyChanged(nameof(ErrorMessage));
+    }
+
+    private void RaiseValueChanged()
+    {
+        RaisePropertyChanged(nameof(Value));
+        RaisePropertyChanged(nameof(Text));
+        RaisePropertyChanged(nameof(RuntimeType));
+        RaisePropertyChanged(nameof(DoubleValue));
+        RaisePropertyChanged(nameof(NullableBoolValue));
+        RaisePropertyChanged(nameof(DateValue));
+        RaisePropertyChanged(nameof(TimeValue));
+        RaisePropertyChanged(nameof(SelectedEnumMember));
+        RaisePropertyChanged(nameof(IsModified));
+        RaisePropertyChanged(nameof(CanResetValue));
+        RaisePropertyChanged(nameof(Errors));
+        RaisePropertyChanged(nameof(HasErrors));
+        RaisePropertyChanged(nameof(ErrorMessage));
+    }
+}

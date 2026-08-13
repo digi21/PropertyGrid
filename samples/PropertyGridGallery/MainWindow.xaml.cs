@@ -51,6 +51,8 @@ public sealed partial class MainWindow : Window
         Grid.SelectProperty(nameof(SampleModel.Opacity));
     }
 
+    internal void ToggleThemeForPicture() => OnToggleTheme(this, new RoutedEventArgs());
+
     private void OnSortChanged(object sender, SelectionChangedEventArgs e)
     {
         if (SortBox.SelectedItem is PropertySort sort)
@@ -77,10 +79,15 @@ public sealed partial class MainWindow : Window
 
     private void OnToggleTheme(object sender, RoutedEventArgs e)
     {
-        if (Content is FrameworkElement root)
+        if (Content is not FrameworkElement root)
         {
-            root.RequestedTheme = root.RequestedTheme == ElementTheme.Dark ? ElementTheme.Light : ElementTheme.Dark;
+            return;
         }
+
+        // ActualTheme, not RequestedTheme. RequestedTheme starts at Default, so asking it what the
+        // window looks like right now gets the wrong answer: on a machine set to dark, the first
+        // press would set Dark - changing nothing anybody can see - and only the second would work.
+        root.RequestedTheme = root.ActualTheme == ElementTheme.Dark ? ElementTheme.Light : ElementTheme.Dark;
     }
 }
 

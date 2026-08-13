@@ -37,6 +37,13 @@ internal sealed class ScreenshotRun(string outputPath, ElementTheme theme)
             // Open one nested property, so the picture shows the indented child rows lining up with
             // everything else - which is the point of the whole layout.
             window?.OpenNestedRowForPicture();
+
+            // With no theme asked for, press the toggle once. That is the case where the window is
+            // still on ElementTheme.Default, and it is the one that used to need two presses.
+            if (theme == ElementTheme.Default)
+            {
+                window?.ToggleThemeForPicture();
+            }
         }
 
         if (frame < 20 || window?.Content is not FrameworkElement content)

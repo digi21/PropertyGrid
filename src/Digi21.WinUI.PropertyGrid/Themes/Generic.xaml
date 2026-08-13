@@ -541,11 +541,27 @@
                         The button sits on top, transparent, and only provides the border and the
                         flyout.
                     -->
-                    <Grid ColumnSpacing="8">
+                    <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
+
+                        <Grid
+                            Width="40"
+                            Height="20"
+                            Margin="4,0,8,0">
+                            <!--
+                                A light backdrop under the swatch, so a colour with alpha reads as
+                                translucent rather than as a slightly different opaque colour.
+                            -->
+                            <Rectangle Fill="{ThemeResource ControlFillColorInputActiveBrush}" />
+
+                            <!-- Painted from code: see PropertyGridColorEditor.UpdateSwatch. -->
+                            <Rectangle x:Name="PART_Swatch" />
+                            <Border BorderBrush="{ThemeResource PropertyGridColorSwatchBorderBrush}" BorderThickness="1" />
+                        </Grid>
 
                         <!--
                             The swatch alone says which colour it roughly is; the numbers beside it
@@ -558,22 +574,32 @@
                             VerticalAlignment="Center"
                             Style="{ThemeResource PropertyGridValueTextStyle}" />
 
-                        <Grid Width="40" Height="20">
+                        <!-- So that it reads as something you can open, rather than as a picture of a colour. -->
+                        <FontIcon
+                            Grid.Column="2"
+                            Margin="4,0,6,0"
+                            VerticalAlignment="Center"
+                            FontFamily="{ThemeResource PropertyGridIconFontFamily}"
+                            FontSize="{ThemeResource PropertyGridIconFontSize}"
+                            Foreground="{ThemeResource PropertyGridExpanderGlyphBrush}"
+                            Glyph="{ThemeResource PropertyGridExpandedGlyph}" />
+
                         <!--
-                            A light backdrop under the swatch, so a colour with alpha reads as
-                            translucent rather than as a slightly different opaque colour.
+                            Laid over all three, so the whole cell opens the picker. It cannot
+                            contain them: an element inside another control's content is outside the
+                            namescope GetTemplateChild searches, and the swatch would never be found
+                            to paint it.
                         -->
-                        <Rectangle Fill="{ThemeResource ControlFillColorInputActiveBrush}" />
-
-                        <!-- Painted from code: see PropertyGridColorEditor.UpdateSwatch. -->
-                        <Rectangle x:Name="PART_Swatch" />
-
                         <Button
                             x:Name="PART_OpenButton"
+                            Grid.ColumnSpan="3"
                             Padding="0"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            AutomationProperties.Name="{ThemeResource PropertyGridEditToolTipText}"
                             Background="Transparent"
-                            BorderBrush="{ThemeResource PropertyGridColorSwatchBorderBrush}"
-                            BorderThickness="1">
+                            BorderThickness="0"
+                            ToolTipService.ToolTip="{ThemeResource PropertyGridEditToolTipText}">
                             <Button.Flyout>
                                 <Flyout Placement="Bottom">
                                     <!--
@@ -600,7 +626,6 @@
                                 </Flyout>
                             </Button.Flyout>
                         </Button>
-                        </Grid>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>

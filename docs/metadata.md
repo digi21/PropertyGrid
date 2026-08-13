@@ -42,6 +42,7 @@ Where the two families overlap, the single-purpose one wins: `[DisplayName]` bea
 | `[PropertyOrder(0)]` | where the property sits, lowest first. Honoured in every sort mode |
 | `[PropertyEditor("Percent")]` | the editor to use instead of the one the type would resolve to |
 | `[Expandable]` | the value can be opened into indented child rows. Also valid on a type |
+| `[FilePath(kind, ".gpkg")]` | the property is a path: a box with a browse button, and the kind and extensions travel to `BrowseRequested`. See [editors.md](editors.md) |
 
 ```csharp
 public class Layer

@@ -240,6 +240,21 @@ internal static class PropertyValueConverter
             return Parsed(Uri.TryCreate(text, UriKind.RelativeOrAbsolute, out Uri? parsed), parsed, out value);
         }
 
+        // Neither of these touches the disk, so a path to something that does not exist yet is
+        // accepted - which is exactly what a "save as" box needs. Nor do they judge the spelling:
+        // .NET stopped rejecting odd characters when it stopped assuming Windows, and whether a path
+        // is usable depends on the file system it lands on. The catch below is for the few things
+        // that still throw, such as a path past the length limit.
+        if (underlying == typeof(FileInfo))
+        {
+            return Parsed(TryCreatePath(text, path => new FileInfo(path), out FileInfo? file), file, out value);
+        }
+
+        if (underlying == typeof(DirectoryInfo))
+        {
+            return Parsed(TryCreatePath(text, path => new DirectoryInfo(path), out DirectoryInfo? folder), folder, out value);
+        }
+
         value = null;
         return false;
     }
@@ -263,6 +278,21 @@ internal static class PropertyValueConverter
             // Converters signal a bad string by throwing whatever they feel like, from FormatException
             // to a bare Exception, so there is nothing narrower to catch here.
             value = null;
+            return false;
+        }
+    }
+
+    private static bool TryCreatePath<T>(string text, Func<string, T> create, out T? created)
+        where T : class
+    {
+        try
+        {
+            created = create(text);
+            return true;
+        }
+        catch (Exception exception) when (exception is ArgumentException or PathTooLongException or NotSupportedException)
+        {
+            created = null;
             return false;
         }
     }

@@ -15,6 +15,15 @@ internal static class BuiltInEditors
         Type underlying = KnownTypes.Unwrap(declared);
         bool nullable = underlying != declared;
 
+        // Before anything else: a path is a path whatever it is stored in, and FileInfo and
+        // DirectoryInfo can only mean one, so they do not need the attribute to say so.
+        if (description.GetAttribute<FilePathAttribute>() is not null
+            || underlying == typeof(FileInfo)
+            || underlying == typeof(DirectoryInfo))
+        {
+            return PropertyEditorKeys.Path;
+        }
+
         if (underlying.IsEnum)
         {
             return EnumInfo.IsFlags(underlying) ? PropertyEditorKeys.FlagsEnum : PropertyEditorKeys.Enum;

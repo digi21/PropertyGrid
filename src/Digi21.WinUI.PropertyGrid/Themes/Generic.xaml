@@ -18,6 +18,7 @@
     <Style BasedOn="{StaticResource DefaultPropertyGridSplitterStyle}" TargetType="primitives:PropertyGridSplitter" />
     <Style BasedOn="{StaticResource DefaultPropertyGridDescriptionPaneStyle}" TargetType="primitives:PropertyGridDescriptionPane" />
     <Style BasedOn="{StaticResource DefaultPropertyGridColorEditorStyle}" TargetType="primitives:PropertyGridColorEditor" />
+    <Style BasedOn="{StaticResource DefaultPropertyGridPathEditorStyle}" TargetType="primitives:PropertyGridPathEditor" />
 
     <!--
         The expander in the name cell. A toggle button with its chrome taken away: the default one
@@ -367,6 +368,55 @@
                             VerticalAlignment="Stretch"
                             Fill="{ThemeResource PropertyGridSplitterBrush}" />
                     </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="DefaultPropertyGridPathEditorStyle" TargetType="primitives:PropertyGridPathEditor">
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="primitives:PropertyGridPathEditor">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox
+                            VerticalAlignment="Center"
+                            primitives:TextEditorBehaviors.CommitOnEnter="True"
+                            primitives:TextEditorBehaviors.SelectAllOnFocus="True"
+                            BorderThickness="0"
+                            IsReadOnly="{Binding IsReadOnly}"
+                            Padding="{ThemeResource PropertyGridEditorPadding}"
+                            Text="{Binding Text, Mode=TwoWay}" />
+
+                        <!--
+                            The button only raises BrowseRequested. Typing a path by hand still
+                            works, which matters for a path that does not exist yet and for anyone
+                            pasting one in.
+                        -->
+                        <Button
+                            x:Name="PART_BrowseButton"
+                            Grid.Column="1"
+                            Width="28"
+                            MinWidth="0"
+                            Margin="2,0,0,0"
+                            Padding="0"
+                            VerticalAlignment="Stretch"
+                            AutomationProperties.Name="Browse"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            ToolTipService.ToolTip="Browse…">
+                            <FontIcon
+                                FontFamily="{ThemeResource PropertyGridIconFontFamily}"
+                                FontSize="{ThemeResource PropertyGridIconFontSize}"
+                                Glyph="{ThemeResource PropertyGridEllipsisGlyph}" />
+                        </Button>
+                    </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

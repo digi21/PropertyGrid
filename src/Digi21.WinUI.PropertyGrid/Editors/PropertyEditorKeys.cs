@@ -25,6 +25,12 @@ public static class PropertyEditorKeys
     /// <summary>A box that hides what is typed into it.</summary>
     public const string Password = "PropertyGridPasswordEditorTemplate";
 
+    /// <summary>
+    /// A text box with a browse button beside it. The button raises
+    /// <see cref="PropertyGrid.BrowseRequested"/>; the grid never opens a dialog itself.
+    /// </summary>
+    public const string Path = "PropertyGridPathEditorTemplate";
+
     /// <summary>A number box, for the numeric types a <see cref="double"/> can hold exactly.</summary>
     public const string Number = "PropertyGridNumberEditorTemplate";
 

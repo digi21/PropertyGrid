@@ -2,6 +2,8 @@ using System.Globalization;
 using Digi21.WinUI.PropertyGrid;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Windows.Storage.Pickers;
+using WinRT.Interop;
 
 namespace PropertyGridGallery;
 
@@ -24,6 +26,55 @@ public sealed partial class MainWindow : Window
             if (arguments.Row.Name == nameof(SampleModel.Opacity))
             {
                 arguments.Template = Grid.EditorTemplates?.Resolve(typeof(int), null, "Percent");
+            }
+        };
+
+        // The grid asks; the application picks. It knows which dialog is right, where it should
+        // start, and - the part a library cannot do - the window handle a WinUI picker needs.
+        Grid.BrowseRequested += async (_, arguments) =>
+        {
+            nint handle = WindowNative.GetWindowHandle(this);
+
+            if (arguments.Kind == FilePathKind.Folder)
+            {
+                FolderPicker folders = new();
+                InitializeWithWindow.Initialize(folders, handle);
+                folders.FileTypeFilter.Add("*");
+
+                if (await folders.PickSingleFolderAsync() is { } folder)
+                {
+                    arguments.Row.Value = folder.Path;
+                }
+
+                return;
+            }
+
+            if (arguments.Kind == FilePathKind.SaveFile)
+            {
+                FileSavePicker saving = new();
+                InitializeWithWindow.Initialize(saving, handle);
+                saving.FileTypeChoices.Add("Data", [.. Extensions(arguments)]);
+
+                if (await saving.PickSaveFileAsync() is { } target)
+                {
+                    arguments.Row.Value = target.Path;
+                }
+
+                return;
+            }
+
+            FileOpenPicker opening = new();
+            InitializeWithWindow.Initialize(opening, handle);
+            foreach (string extension in Extensions(arguments))
+            {
+                opening.FileTypeFilter.Add(extension);
+            }
+
+            // The write can happen long after the handler returned; the row is observable, so the
+            // grid picks it up without anything else being told.
+            if (await opening.PickSingleFileAsync() is { } chosen)
+            {
+                arguments.Row.Value = chosen.Path;
             }
         };
 
@@ -52,6 +103,9 @@ public sealed partial class MainWindow : Window
     }
 
     internal void ToggleThemeForPicture() => OnToggleTheme(this, new RoutedEventArgs());
+
+    private static IReadOnlyList<string> Extensions(PropertyGridBrowseRequestedEventArgs arguments) =>
+        arguments.Extensions.Count > 0 ? arguments.Extensions : ["*"];
 
     private void OnSortChanged(object sender, SelectionChangedEventArgs e)
     {

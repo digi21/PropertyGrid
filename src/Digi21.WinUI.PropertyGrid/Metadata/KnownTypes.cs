@@ -18,6 +18,11 @@ internal static class KnownTypes
         typeof(Guid),
         typeof(Uri),
         typeof(Version),
+
+        // A path, not a thing with properties. Left out, they would be offered as objects to open
+        // and the user would be reading CreationTime and Attributes instead of editing a filename.
+        typeof(FileInfo),
+        typeof(DirectoryInfo),
     ];
 
     // Structs that are conceptually a handful of numbers. They are simple in the sense that they have

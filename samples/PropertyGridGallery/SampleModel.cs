@@ -25,6 +25,8 @@ public class SampleModel : ObservableObject
     private decimal featureCount = 9007199254740993m;
     private double area = 1234.56;
     private Uri? source = new("https://example.com/parcels.gpkg");
+    private string sourceFile = @"C:\data\parcels.gpkg";
+    private DirectoryInfo? exportFolder = new(@"C:\data\exports");
     private DateTime updatedAt = new(2026, 8, 13, 9, 30, 0, DateTimeKind.Local);
     private DateOnly surveyedOn = new(2026, 3, 1);
     private TimeSpan refreshEvery = TimeSpan.FromMinutes(90);
@@ -133,6 +135,23 @@ public class SampleModel : ObservableObject
     {
         get => source;
         set => SetProperty(ref source, value);
+    }
+
+    [Category("Source")]
+    [FilePath(FilePathKind.OpenFile, ".gpkg", ".las")]
+    [Description("The file on disk. The button asks the application to browse; the grid never opens a dialog itself.")]
+    public string SourceFile
+    {
+        get => sourceFile;
+        set => SetProperty(ref sourceFile, value);
+    }
+
+    [Category("Source")]
+    [Description("Where exports are written. A DirectoryInfo, so it gets the browse button without the attribute.")]
+    public DirectoryInfo? ExportFolder
+    {
+        get => exportFolder;
+        set => SetProperty(ref exportFolder, value);
     }
 
     [Category("Source")]

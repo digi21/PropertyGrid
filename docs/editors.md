@@ -10,6 +10,7 @@ Each row's value cell is a `DataTemplate` whose data context is the
 | `string` | text box | `PropertyGridStringEditorTemplate` |
 | `string` with `[DataType(MultilineText)]` | wrapping text box | `PropertyGridMultilineStringEditorTemplate` |
 | `string` with `[PasswordPropertyText(true)]` or `[DataType(Password)]` | password box | `PropertyGridPasswordEditorTemplate` |
+| anything with `[FilePath]`, and `FileInfo` / `DirectoryInfo` | text box with a browse button | `PropertyGridPathEditorTemplate` |
 | `char`, `Guid`, `Uri`, `Version` | text box | `PropertyGridStringEditorTemplate` |
 | `byte`…`int`, `uint`, `float`, `double` | number box | `PropertyGridNumberEditorTemplate` |
 | `long`, `ulong`, `decimal` | text box | `PropertyGridLargeNumberEditorTemplate` |
@@ -41,6 +42,51 @@ Three of those are not the obvious choice, on purpose:
 listing the installed font families needs DirectWrite interop the package will not take a dependency
 on. Declare a template under that key and `[PropertyEditor(PropertyEditorKeys.FontFamily)]` will find
 it.
+
+## Paths
+
+A property marked `[FilePath]`, and any property typed `FileInfo` or `DirectoryInfo`, gets a text
+box with a `…` button beside it:
+
+```csharp
+[FilePath(FilePathKind.OpenFile, ".gpkg", ".las")]
+public string SourceFile { get; set; } = string.Empty;
+
+// No attribute needed: these types can only mean a path.
+public DirectoryInfo? ExportFolder { get; set; }
+```
+
+**The grid never opens a dialog.** Which one to open, where it starts and how it is filtered are the
+application's business, and in WinUI 3 a picker needs the window handle, which a control has no
+dependable way to reach. The button raises `BrowseRequested` and stops there:
+
+```csharp
+grid.BrowseRequested += async (_, arguments) =>
+{
+    FileOpenPicker picker = new();
+    InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
+
+    foreach (string extension in arguments.Extensions)
+    {
+        picker.FileTypeFilter.Add(extension);
+    }
+
+    if (await picker.PickSingleFileAsync() is { } file)
+    {
+        arguments.Row.Value = file.Path;
+    }
+};
+```
+
+The handler may take as long as it likes. There is no deferral and no result property to fill in
+before returning: the way to report what was chosen is to write `Row.Value` when the answer arrives,
+and because the row is observable a write from a continuation reaches the grid on its own. Writing a
+string to a `FileInfo` or `DirectoryInfo` property is converted for you.
+
+`arguments.Kind` is `OpenFile`, `SaveFile` or `Folder`, so one handler can serve every path in the
+application; `arguments.Extensions` is what the attribute declared, each with its leading dot, or
+empty for anything. Typing a path by hand keeps working, which matters for a file that does not
+exist yet and for anyone pasting one in.
 
 ## Replacing an editor everywhere
 

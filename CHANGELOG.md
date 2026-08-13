@@ -43,6 +43,10 @@ API can still change. Builds before the tag are published as `0.1.0-dev.N`.
 - Editors for text, multiline text, passwords, every numeric type, booleans and nullable booleans,
   enumerations, `[Flags]` enumerations, dates, times, durations, colours, brushes, the geometry
   structs, and a fixed list of values from a type converter.
+- A path editor — a box with a browse button — for `[FilePath]` properties and for anything typed
+  `FileInfo` or `DirectoryInfo`. The button raises `BrowseRequested` carrying the kind of path and
+  the extensions it accepts; the application opens whatever dialog is right and writes the row's
+  value when the answer arrives. The grid never opens a file dialog itself.
 - `PropertyEditorTemplateMap`, registering an editor for a type, an interface and its
   implementations, or a name a property asks for.
 - Replacing a whole category of editors by redeclaring a `DataTemplate` under a

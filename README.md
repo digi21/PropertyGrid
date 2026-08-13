@@ -19,6 +19,8 @@ attributes already on your model, validated, and kept in step with the object as
 - **An editor per type.** Text, numbers, booleans, enumerations, flags, dates, times, durations,
   colours, brushes and more — including the cases that are easy to get wrong, like `decimal` and
   `long` staying away from a double-backed number box.
+- **Paths**, with a browse button that asks your application to open the dialog — it knows the
+  filter, the starting folder and the window handle; a library does not.
 - **A resizable name column.** One splitter drags it in every row at once, at every level of nesting.
 - **Categories** that collapse, from `[Category]` or `[Display(GroupName)]`.
 - **The attributes you already have**: `[Browsable]`, `[Category]`, `[Description]`,

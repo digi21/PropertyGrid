@@ -53,6 +53,10 @@
             Password="{Binding Text, Mode=TwoWay}" />
     </DataTemplate>
 
+    <DataTemplate x:Key="PropertyGridPathEditorTemplate">
+        <primitives:PropertyGridPathEditor IsEnabled="{Binding IsEditable}" />
+    </DataTemplate>
+
     <DataTemplate x:Key="PropertyGridNumberEditorTemplate">
         <NumberBox
             HorizontalAlignment="Stretch"

@@ -204,6 +204,15 @@ public partial class PropertyGrid : Control
     /// <summary>Raised after a value has been written.</summary>
     public event EventHandler<PropertyValueChangedEventArgs>? PropertyValueChanged;
 
+    /// <summary>Raised when the user asks to browse for a path.</summary>
+    /// <remarks>
+    /// The grid never opens a file dialog itself: which one, where it starts and how it is filtered
+    /// are the application's business, and in WinUI 3 a picker needs the window handle, which a
+    /// control has no dependable way to reach. Handle this, open whatever is right, and write
+    /// <c>Row.Value</c> when the answer arrives — the handler is free to be asynchronous.
+    /// </remarks>
+    public event EventHandler<PropertyGridBrowseRequestedEventArgs>? BrowseRequested;
+
     /// <summary>Gets or sets the object whose properties are shown.</summary>
     public object? SelectedObject
     {
@@ -553,6 +562,9 @@ public partial class PropertyGrid : Control
             FilterText = sender.Text;
         }
     }
+
+    internal void RaiseBrowseRequested(PropertyGridPropertyRow row, FilePathKind kind, IReadOnlyList<string> extensions) =>
+        BrowseRequested?.Invoke(this, new PropertyGridBrowseRequestedEventArgs(row, kind, extensions));
 
     internal Microsoft.UI.Xaml.DataTemplate? RaiseEditorSelecting(PropertyGridPropertyRow row)
     {

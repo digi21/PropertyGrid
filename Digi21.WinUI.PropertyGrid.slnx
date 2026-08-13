@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/samples/">
+    <Project Path="samples/PropertyGridGallery/PropertyGridGallery.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Digi21.WinUI.PropertyGrid/Digi21.WinUI.PropertyGrid.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Digi21.WinUI.PropertyGrid.Tests/Digi21.WinUI.PropertyGrid.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,28 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:pg="using:Digi21.WinUI.PropertyGrid">
+
+    <!--
+        Every control gets an implicit style chaining to a keyed default, so that an application can
+        derive from the default with BasedOn instead of copying the whole template out of the source.
+    -->
+    <Style BasedOn="{StaticResource DefaultPropertyGridStyle}" TargetType="pg:PropertyGrid" />
+
+    <Style x:Key="DefaultPropertyGridStyle" TargetType="pg:PropertyGrid">
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="pg:PropertyGrid">
+                    <Border
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

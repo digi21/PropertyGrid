@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>Digi21.WinUI.PropertyGrid</RootNamespace>
+    <UseWinUI>true</UseWinUI>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Packaging">
+    <PackageId>Digi21.WinUI.PropertyGrid</PackageId>
+    <Description>A property grid for WinUI 3: bind an object and get an editable, categorized list of its properties, with editors chosen per type, a resizable name column, nested objects, attribute-driven metadata, validation, and templates you can replace from XAML.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageTags>winui;winui3;propertygrid;property;inspector;editor;reflection;windows-app-sdk;windowsappsdk</PackageTags>
+    <PackageProjectUrl>https://github.com/Digi21/PropertyGrid</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Digi21/PropertyGrid</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.251106002" />
+    <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\icon.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Digi21.WinUI.PropertyGrid.Tests" />
+  </ItemGroup>
+
+</Project>

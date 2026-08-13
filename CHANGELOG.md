@@ -5,7 +5,10 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.0] - 2026-08-13
+
+First version. Everything below works and is covered by tests or by the gallery, but nothing has
+been through a real application yet — hence 0.1 rather than 1.0. The public API can still change.
 
 ### Added
 

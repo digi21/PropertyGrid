@@ -2,9 +2,74 @@
     x:Class="PropertyGridGallery.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:PropertyGridGallery"
     xmlns:pg="using:Digi21.WinUI.PropertyGrid">
 
-    <Grid Padding="12">
-        <pg:PropertyGrid x:Name="Grid" />
+    <Grid
+        Padding="12"
+        Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+        RowSpacing="8">
+        <Grid.Resources>
+            <!--
+                A custom editor for one type, declared entirely in markup. The data context of the
+                template is the PropertyGridPropertyRow, so it binds the typed properties on the row.
+            -->
+        </Grid.Resources>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Spacing="8">
+            <ComboBox
+                x:Name="SortBox"
+                SelectionChanged="OnSortChanged"
+                Width="220" />
+            <Button Click="OnChangeFromOutside" Content="Change the object from code" />
+            <Button Click="OnExpandAll" Content="Expand categories" />
+            <Button Click="OnCollapseAll" Content="Collapse categories" />
+            <ToggleButton x:Name="ReadOnlyToggle" Click="OnToggleReadOnly" Content="Read only" />
+            <Button Click="OnToggleTheme" Content="Toggle theme" />
+        </StackPanel>
+
+        <pg:PropertyGrid
+            x:Name="Grid"
+            Grid.Row="1"
+            SelectedObject="{x:Bind Model}"
+            ShowSearchBox="True">
+            <pg:PropertyGrid.EditorTemplates>
+                <pg:PropertyEditorTemplateMap>
+                    <pg:PropertyEditorTemplate Key="Percent">
+                        <DataTemplate>
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Slider
+                                    Maximum="100"
+                                    Minimum="0"
+                                    StepFrequency="1"
+                                    Value="{Binding DoubleValue, Mode=TwoWay}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding Text}" />
+                            </Grid>
+                        </DataTemplate>
+                    </pg:PropertyEditorTemplate>
+                </pg:PropertyEditorTemplateMap>
+            </pg:PropertyGrid.EditorTemplates>
+        </pg:PropertyGrid>
+
+        <TextBlock
+            x:Name="Trace"
+            Grid.Row="2"
+            FontFamily="Consolas"
+            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+            Text="Ready." />
     </Grid>
 </Window>
+

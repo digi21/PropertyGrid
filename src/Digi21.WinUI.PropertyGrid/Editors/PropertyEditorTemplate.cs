@@ -20,7 +20,7 @@ namespace Digi21.WinUI.PropertyGrid;
 /// &lt;/pg:PropertyEditorTemplate&gt;
 /// </code>
 /// </example>
-[ContentProperty(Name = nameof(Template))]
+[ContentProperty(Name = nameof(ValueTemplate))]
 public partial class PropertyEditorTemplate : DependencyObject
 {
     /// <summary>Identifies the <see cref="TargetType"/> dependency property.</summary>
@@ -44,9 +44,9 @@ public partial class PropertyEditorTemplate : DependencyObject
         typeof(PropertyEditorTemplate),
         new PropertyMetadata(false));
 
-    /// <summary>Identifies the <see cref="Template"/> dependency property.</summary>
-    public static readonly DependencyProperty TemplateProperty = DependencyProperty.Register(
-        nameof(Template),
+    /// <summary>Identifies the <see cref="ValueTemplate"/> dependency property.</summary>
+    public static readonly DependencyProperty ValueTemplateProperty = DependencyProperty.Register(
+        nameof(ValueTemplate),
         typeof(DataTemplate),
         typeof(PropertyEditorTemplate),
         new PropertyMetadata(null));
@@ -83,11 +83,20 @@ public partial class PropertyEditorTemplate : DependencyObject
     /// Gets or sets the template that renders the value cell. Its data context is the
     /// <see cref="PropertyGridPropertyRow"/> being edited.
     /// </summary>
-    public DataTemplate? Template
+    /// <remarks>
+    /// Named <c>ValueTemplate</c> rather than the more obvious <c>Template</c> on purpose. A
+    /// dependency property called <c>Template</c> on a plain <see cref="DependencyObject"/> is
+    /// silently dropped by the XAML compiler — the object is created, its other properties are set,
+    /// and that one is left null with no warning and no error. Setting it from code works, which
+    /// makes the difference maddening to track down. Presumably it collides with the well-known
+    /// <c>Control.Template</c>.
+    /// </remarks>
+    public DataTemplate? ValueTemplate
     {
-        get => (DataTemplate?)GetValue(TemplateProperty);
-        set => SetValue(TemplateProperty, value);
+        get => (DataTemplate?)GetValue(ValueTemplateProperty);
+        set => SetValue(ValueTemplateProperty, value);
     }
 
     internal EditorCriteria ToCriteria() => new(TargetType, Key, MatchDerivedTypes);
 }
+

@@ -1,0 +1,149 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:primitives="using:Digi21.WinUI.PropertyGrid.Primitives">
+
+    <!--
+        The editors, one DataTemplate per kind of value. The data context of each is the
+        PropertyGridPropertyRow being edited.
+
+        These live here rather than next to the control templates on purpose. A key found in the
+        same dictionary as the template using it outranks the application's, so keeping them beside
+        the control templates would make them impossible to replace. From here they are merged into
+        Application.Resources as defaults, and declaring a DataTemplate under the same key in
+        App.xaml swaps that editor out everywhere.
+
+        Every editor binds a typed property on the row rather than Value through a converter: the
+        row knows the declared type, the culture and the validation rules, and a converter knows
+        none of them.
+    -->
+
+    <DataTemplate x:Key="PropertyGridStringEditorTemplate">
+        <TextBox
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Center"
+            primitives:TextEditorBehaviors.CommitOnEnter="True"
+            primitives:TextEditorBehaviors.SelectAllOnFocus="True"
+            BorderThickness="0"
+            IsReadOnly="{Binding IsReadOnly}"
+            Padding="{ThemeResource PropertyGridEditorPadding}"
+            Text="{Binding Text, Mode=TwoWay}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="PropertyGridMultilineStringEditorTemplate">
+        <TextBox
+            HorizontalAlignment="Stretch"
+            primitives:TextEditorBehaviors.SelectAllOnFocus="True"
+            AcceptsReturn="True"
+            BorderThickness="0"
+            IsReadOnly="{Binding IsReadOnly}"
+            MaxHeight="120"
+            Padding="{ThemeResource PropertyGridEditorPadding}"
+            Text="{Binding Text, Mode=TwoWay}"
+            TextWrapping="Wrap" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="PropertyGridPasswordEditorTemplate">
+        <PasswordBox
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Center"
+            BorderThickness="0"
+            IsEnabled="{Binding IsEditable}"
+            Padding="{ThemeResource PropertyGridEditorPadding}"
+            Password="{Binding Text, Mode=TwoWay}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="PropertyGridNumberEditorTemplate">
+        <NumberBox
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Center"
+            BorderThickness="0"
+            IsEnabled="{Binding IsEditable}"
+            SpinButtonPlacementMode="Compact"
+            Value="{Binding DoubleValue, Mode=TwoWay}" />
+    </DataTemplate>
+
+    <!--
+        Long, ulong and decimal come here rather than to the number box above. A NumberBox works in
+        doubles, so anything past 2^53 would come back with its low bits quietly rounded away.
+    -->
+    <DataTemplate x:Key="PropertyGridLargeNumberEditorTemplate">
+        <TextBox
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Center"
+            primitives:TextEditorBehaviors.CommitOnEnter="True"
+            primitives:TextEditorBehaviors.SelectAllOnFocus="True"
+            BorderThickness="0"
+            IsReadOnly="{Binding IsReadOnly}"
+            Padding="{ThemeResource PropertyGridEditorPadding}"
+            Text="{Binding Text, Mode=TwoWay}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="PropertyGridBooleanEditorTemplate">
+        <CheckBox
+            MinWidth="0"
+            Margin="6,0,0,0"
+            VerticalAlignment="Center"
+            IsChecked="{Binding NullableBoolValue, Mode=TwoWay}"
+            IsEnabled="{Binding IsEditable}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="PropertyGridNullableBooleanEditorTemplate">
+        <CheckBox
+            MinWidth="0"
+            Margin="6,0,0,0"
+            VerticalAlignment="Center"
+            IsChecked="{Binding NullableBoolValue, Mode=TwoWay}"
+            IsEnabled="{Binding IsEditable}"
+            IsThreeState="True" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="PropertyGridEnumEditorTemplate">
+        <ComboBox
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Center"
+            BorderThickness="0"
+            DisplayMemberPath="DisplayName"
+            IsEnabled="{Binding IsEditable}"
+            ItemsSource="{Binding EnumMembers}"
+            SelectedItem="{Binding SelectedEnumMember, Mode=TwoWay}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="PropertyGridStructEditorTemplate">
+        <TextBox
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Center"
+            primitives:TextEditorBehaviors.CommitOnEnter="True"
+            primitives:TextEditorBehaviors.SelectAllOnFocus="True"
+            BorderThickness="0"
+            IsReadOnly="{Binding IsReadOnly}"
+            Padding="{ThemeResource PropertyGridEditorPadding}"
+            Text="{Binding Text, Mode=TwoWay}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="PropertyGridComplexEditorTemplate">
+        <TextBlock
+            Padding="{ThemeResource PropertyGridEditorPadding}"
+            Foreground="{ThemeResource PropertyGridReadOnlyForegroundBrush}"
+            Style="{ThemeResource PropertyGridValueTextStyle}"
+            Text="{Binding Text}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="PropertyGridCollectionEditorTemplate">
+        <TextBlock
+            Padding="{ThemeResource PropertyGridEditorPadding}"
+            Foreground="{ThemeResource PropertyGridReadOnlyForegroundBrush}"
+            Style="{ThemeResource PropertyGridValueTextStyle}"
+            Text="{Binding Text}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="PropertyGridReadOnlyEditorTemplate">
+        <TextBlock
+            Padding="{ThemeResource PropertyGridEditorPadding}"
+            Foreground="{ThemeResource PropertyGridReadOnlyForegroundBrush}"
+            IsTextSelectionEnabled="True"
+            Style="{ThemeResource PropertyGridValueTextStyle}"
+            Text="{Binding Text}" />
+    </DataTemplate>
+
+</ResourceDictionary>

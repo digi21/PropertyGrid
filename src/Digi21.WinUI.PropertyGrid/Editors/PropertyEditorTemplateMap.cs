@@ -18,18 +18,22 @@ namespace Digi21.WinUI.PropertyGrid;
 /// </remarks>
 /// <example>
 /// <code language="xml">
-/// &lt;pg:PropertyEditorTemplateMap x:Key="CartographyEditors"&gt;
-///     &lt;pg:PropertyEditorTemplate TargetType="local:Rating"&gt;
-///         &lt;DataTemplate&gt;
-///             &lt;RatingControl MaxRating="5" Value="{Binding DoubleValue, Mode=TwoWay}" /&gt;
-///         &lt;/DataTemplate&gt;
-///     &lt;/pg:PropertyEditorTemplate&gt;
-///     &lt;pg:PropertyEditorTemplate Key="Percent"&gt;
-///         &lt;DataTemplate&gt;
-///             &lt;Slider Maximum="100" Minimum="0" Value="{Binding DoubleValue, Mode=TwoWay}" /&gt;
-///         &lt;/DataTemplate&gt;
-///     &lt;/pg:PropertyEditorTemplate&gt;
-/// &lt;/pg:PropertyEditorTemplateMap&gt;
+/// &lt;pg:PropertyGrid SelectedObject="{x:Bind Layer}"&gt;
+///     &lt;pg:PropertyGrid.EditorTemplates&gt;
+///         &lt;pg:PropertyEditorTemplateMap&gt;
+///             &lt;pg:PropertyEditorTemplate TargetType="local:Rating"&gt;
+///                 &lt;DataTemplate&gt;
+///                     &lt;RatingControl MaxRating="5" Value="{Binding DoubleValue, Mode=TwoWay}" /&gt;
+///                 &lt;/DataTemplate&gt;
+///             &lt;/pg:PropertyEditorTemplate&gt;
+///             &lt;pg:PropertyEditorTemplate Key="Percent"&gt;
+///                 &lt;DataTemplate&gt;
+///                     &lt;Slider Maximum="100" Minimum="0" Value="{Binding DoubleValue, Mode=TwoWay}" /&gt;
+///                 &lt;/DataTemplate&gt;
+///             &lt;/pg:PropertyEditorTemplate&gt;
+///         &lt;/pg:PropertyEditorTemplateMap&gt;
+///     &lt;/pg:PropertyGrid.EditorTemplates&gt;
+/// &lt;/pg:PropertyGrid&gt;
 /// </code>
 /// </example>
 [ContentProperty(Name = nameof(Entries))]
@@ -73,6 +77,7 @@ public partial class PropertyEditorTemplateMap : DependencyObject
         }
 
         int match = PropertyEditorMatching.Resolve(criteria, declaredType, runtimeType, explicitKey);
-        return match == PropertyEditorMatching.NoMatch ? null : Entries[match].Template;
+        return match == PropertyEditorMatching.NoMatch ? null : Entries[match].ValueTemplate;
     }
 }
+

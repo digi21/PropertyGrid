@@ -46,9 +46,23 @@ property discovery, attribute reading, metadata overrides, ordering and categori
 conversion, enum and flag decomposition, change notification, validation, row flattening, and editor
 resolution. Those are expected to grow with any change to them.
 
-There is no UI test harness. Control templates, splitter dragging, virtualization and recycling,
-focus and keyboard behaviour, and the visuals of each editor are validated by running the gallery and
-trying them. Please say in the pull request what you tried by hand.
+Control templates, splitter dragging, focus and keyboard behaviour, and the visuals of each editor
+are validated by running the gallery and trying them. Please say in the pull request what you tried
+by hand.
+
+Two things the gallery can answer without a person watching:
+
+```
+dotnet run --project samples/PropertyGridGallery -- --screenshot gallery.png light
+dotnet run --project samples/PropertyGridGallery -- --diagnose report.txt
+```
+
+The first opens the gallery, lets it settle, saves a picture and exits — how the image in the README
+is produced, and a quick way to see that a layout change did not collapse something. The second puts
+four hundred rows through the repeater, scrolls them, and reports what actually happened: how many
+elements were realized, how often they were recycled, and whether the content presenter kept the
+editor it had already built. Those are the questions the design rests on and the ones no unit test
+can reach; if you change how rows are realized, run it and put the numbers in the pull request.
 
 Two rules keep the tests possible, and both are easy to break by accident:
 

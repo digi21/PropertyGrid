@@ -1,0 +1,163 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        The brushes, metrics and editor templates the grid draws itself with. This dictionary is
+        merged into Application.Resources at the bottom of the collection, so anything the
+        application declares wins over what is here.
+
+        Every brush is an alias of a WinUI system brush rather than a literal colour, so the grid
+        follows the accent colour, the theme and high contrast without a line of code.
+    -->
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="ms-appx:///Digi21.WinUI.PropertyGrid/Themes/PropertyGridEditors.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <ResourceDictionary.ThemeDictionaries>
+
+        <ResourceDictionary x:Key="Default">
+            <StaticResource x:Key="PropertyGridBackgroundBrush" ResourceKey="LayerFillColorDefaultBrush" />
+            <StaticResource x:Key="PropertyGridBorderBrush" ResourceKey="CardStrokeColorDefaultBrush" />
+            <StaticResource x:Key="PropertyGridRowBackgroundBrush" ResourceKey="SubtleFillColorTransparentBrush" />
+            <StaticResource x:Key="PropertyGridRowAlternateBackgroundBrush" ResourceKey="SubtleFillColorSecondaryBrush" />
+            <StaticResource x:Key="PropertyGridRowPointerOverBackgroundBrush" ResourceKey="SubtleFillColorSecondaryBrush" />
+            <StaticResource x:Key="PropertyGridRowSelectedBackgroundBrush" ResourceKey="SubtleFillColorTertiaryBrush" />
+            <StaticResource x:Key="PropertyGridRowSeparatorBrush" ResourceKey="DividerStrokeColorDefaultBrush" />
+            <StaticResource x:Key="PropertyGridColumnRuleBrush" ResourceKey="DividerStrokeColorDefaultBrush" />
+            <StaticResource x:Key="PropertyGridIndentGuideBrush" ResourceKey="DividerStrokeColorDefaultBrush" />
+            <StaticResource x:Key="PropertyGridNameForegroundBrush" ResourceKey="TextFillColorPrimaryBrush" />
+            <StaticResource x:Key="PropertyGridModifiedNameForegroundBrush" ResourceKey="AccentTextFillColorPrimaryBrush" />
+            <StaticResource x:Key="PropertyGridValueForegroundBrush" ResourceKey="TextFillColorPrimaryBrush" />
+            <StaticResource x:Key="PropertyGridReadOnlyForegroundBrush" ResourceKey="TextFillColorSecondaryBrush" />
+            <StaticResource x:Key="PropertyGridCategoryBackgroundBrush" ResourceKey="CardBackgroundFillColorSecondaryBrush" />
+            <StaticResource x:Key="PropertyGridCategoryForegroundBrush" ResourceKey="TextFillColorSecondaryBrush" />
+            <StaticResource x:Key="PropertyGridCategoryBorderBrush" ResourceKey="DividerStrokeColorDefaultBrush" />
+            <StaticResource x:Key="PropertyGridExpanderGlyphBrush" ResourceKey="TextFillColorSecondaryBrush" />
+            <StaticResource x:Key="PropertyGridSplitterBrush" ResourceKey="DividerStrokeColorDefaultBrush" />
+            <StaticResource x:Key="PropertyGridSplitterPointerOverBrush" ResourceKey="AccentFillColorDefaultBrush" />
+            <StaticResource x:Key="PropertyGridSplitterPressedBrush" ResourceKey="AccentFillColorTertiaryBrush" />
+            <StaticResource x:Key="PropertyGridDescriptionPaneBackgroundBrush" ResourceKey="CardBackgroundFillColorDefaultBrush" />
+            <StaticResource x:Key="PropertyGridDescriptionPaneBorderBrush" ResourceKey="DividerStrokeColorDefaultBrush" />
+            <StaticResource x:Key="PropertyGridDescriptionTitleForegroundBrush" ResourceKey="TextFillColorPrimaryBrush" />
+            <StaticResource x:Key="PropertyGridDescriptionForegroundBrush" ResourceKey="TextFillColorSecondaryBrush" />
+            <StaticResource x:Key="PropertyGridErrorBorderBrush" ResourceKey="SystemFillColorCriticalBrush" />
+            <StaticResource x:Key="PropertyGridErrorForegroundBrush" ResourceKey="SystemFillColorCriticalBrush" />
+            <StaticResource x:Key="PropertyGridErrorBackgroundBrush" ResourceKey="SystemFillColorCriticalBackgroundBrush" />
+            <StaticResource x:Key="PropertyGridColorSwatchBorderBrush" ResourceKey="ControlStrokeColorDefaultBrush" />
+        </ResourceDictionary>
+
+        <ResourceDictionary x:Key="Light">
+            <StaticResource x:Key="PropertyGridBackgroundBrush" ResourceKey="LayerFillColorDefaultBrush" />
+            <StaticResource x:Key="PropertyGridBorderBrush" ResourceKey="CardStrokeColorDefaultBrush" />
+            <StaticResource x:Key="PropertyGridRowBackgroundBrush" ResourceKey="SubtleFillColorTransparentBrush" />
+            <StaticResource x:Key="PropertyGridRowAlternateBackgroundBrush" ResourceKey="SubtleFillColorSecondaryBrush" />
+            <StaticResource x:Key="PropertyGridRowPointerOverBackgroundBrush" ResourceKey="SubtleFillColorSecondaryBrush" />
+            <StaticResource x:Key="PropertyGridRowSelectedBackgroundBrush" ResourceKey="SubtleFillColorTertiaryBrush" />
+            <StaticResource x:Key="PropertyGridRowSeparatorBrush" ResourceKey="DividerStrokeColorDefaultBrush" />
+            <StaticResource x:Key="PropertyGridColumnRuleBrush" ResourceKey="DividerStrokeColorDefaultBrush" />
+            <StaticResource x:Key="PropertyGridIndentGuideBrush" ResourceKey="DividerStrokeColorDefaultBrush" />
+            <StaticResource x:Key="PropertyGridNameForegroundBrush" ResourceKey="TextFillColorPrimaryBrush" />
+            <StaticResource x:Key="PropertyGridModifiedNameForegroundBrush" ResourceKey="AccentTextFillColorPrimaryBrush" />
+            <StaticResource x:Key="PropertyGridValueForegroundBrush" ResourceKey="TextFillColorPrimaryBrush" />
+            <StaticResource x:Key="PropertyGridReadOnlyForegroundBrush" ResourceKey="TextFillColorSecondaryBrush" />
+            <StaticResource x:Key="PropertyGridCategoryBackgroundBrush" ResourceKey="CardBackgroundFillColorSecondaryBrush" />
+            <StaticResource x:Key="PropertyGridCategoryForegroundBrush" ResourceKey="TextFillColorSecondaryBrush" />
+            <StaticResource x:Key="PropertyGridCategoryBorderBrush" ResourceKey="DividerStrokeColorDefaultBrush" />
+            <StaticResource x:Key="PropertyGridExpanderGlyphBrush" ResourceKey="TextFillColorSecondaryBrush" />
+            <StaticResource x:Key="PropertyGridSplitterBrush" ResourceKey="DividerStrokeColorDefaultBrush" />
+            <StaticResource x:Key="PropertyGridSplitterPointerOverBrush" ResourceKey="AccentFillColorDefaultBrush" />
+            <StaticResource x:Key="PropertyGridSplitterPressedBrush" ResourceKey="AccentFillColorTertiaryBrush" />
+            <StaticResource x:Key="PropertyGridDescriptionPaneBackgroundBrush" ResourceKey="CardBackgroundFillColorDefaultBrush" />
+            <StaticResource x:Key="PropertyGridDescriptionPaneBorderBrush" ResourceKey="DividerStrokeColorDefaultBrush" />
+            <StaticResource x:Key="PropertyGridDescriptionTitleForegroundBrush" ResourceKey="TextFillColorPrimaryBrush" />
+            <StaticResource x:Key="PropertyGridDescriptionForegroundBrush" ResourceKey="TextFillColorSecondaryBrush" />
+            <StaticResource x:Key="PropertyGridErrorBorderBrush" ResourceKey="SystemFillColorCriticalBrush" />
+            <StaticResource x:Key="PropertyGridErrorForegroundBrush" ResourceKey="SystemFillColorCriticalBrush" />
+            <StaticResource x:Key="PropertyGridErrorBackgroundBrush" ResourceKey="SystemFillColorCriticalBackgroundBrush" />
+            <StaticResource x:Key="PropertyGridColorSwatchBorderBrush" ResourceKey="ControlStrokeColorDefaultBrush" />
+        </ResourceDictionary>
+
+        <ResourceDictionary x:Key="HighContrast">
+            <StaticResource x:Key="PropertyGridBackgroundBrush" ResourceKey="SystemControlBackgroundAltHighBrush" />
+            <StaticResource x:Key="PropertyGridBorderBrush" ResourceKey="SystemControlForegroundBaseHighBrush" />
+            <StaticResource x:Key="PropertyGridRowBackgroundBrush" ResourceKey="SystemControlTransparentBrush" />
+            <StaticResource x:Key="PropertyGridRowAlternateBackgroundBrush" ResourceKey="SystemControlTransparentBrush" />
+            <StaticResource x:Key="PropertyGridRowPointerOverBackgroundBrush" ResourceKey="SystemControlHighlightListLowBrush" />
+            <StaticResource x:Key="PropertyGridRowSelectedBackgroundBrush" ResourceKey="SystemControlHighlightListAccentLowBrush" />
+            <StaticResource x:Key="PropertyGridRowSeparatorBrush" ResourceKey="SystemControlForegroundBaseMediumBrush" />
+            <StaticResource x:Key="PropertyGridColumnRuleBrush" ResourceKey="SystemControlForegroundBaseMediumBrush" />
+            <StaticResource x:Key="PropertyGridIndentGuideBrush" ResourceKey="SystemControlForegroundBaseMediumBrush" />
+            <StaticResource x:Key="PropertyGridNameForegroundBrush" ResourceKey="SystemControlForegroundBaseHighBrush" />
+            <StaticResource x:Key="PropertyGridModifiedNameForegroundBrush" ResourceKey="SystemControlHighlightAltBaseHighBrush" />
+            <StaticResource x:Key="PropertyGridValueForegroundBrush" ResourceKey="SystemControlForegroundBaseHighBrush" />
+            <StaticResource x:Key="PropertyGridReadOnlyForegroundBrush" ResourceKey="SystemControlDisabledBaseMediumLowBrush" />
+            <StaticResource x:Key="PropertyGridCategoryBackgroundBrush" ResourceKey="SystemControlBackgroundListLowBrush" />
+            <StaticResource x:Key="PropertyGridCategoryForegroundBrush" ResourceKey="SystemControlForegroundBaseHighBrush" />
+            <StaticResource x:Key="PropertyGridCategoryBorderBrush" ResourceKey="SystemControlForegroundBaseMediumBrush" />
+            <StaticResource x:Key="PropertyGridExpanderGlyphBrush" ResourceKey="SystemControlForegroundBaseHighBrush" />
+            <StaticResource x:Key="PropertyGridSplitterBrush" ResourceKey="SystemControlForegroundBaseMediumBrush" />
+            <StaticResource x:Key="PropertyGridSplitterPointerOverBrush" ResourceKey="SystemControlHighlightAccentBrush" />
+            <StaticResource x:Key="PropertyGridSplitterPressedBrush" ResourceKey="SystemControlHighlightAccentBrush" />
+            <StaticResource x:Key="PropertyGridDescriptionPaneBackgroundBrush" ResourceKey="SystemControlBackgroundListLowBrush" />
+            <StaticResource x:Key="PropertyGridDescriptionPaneBorderBrush" ResourceKey="SystemControlForegroundBaseMediumBrush" />
+            <StaticResource x:Key="PropertyGridDescriptionTitleForegroundBrush" ResourceKey="SystemControlForegroundBaseHighBrush" />
+            <StaticResource x:Key="PropertyGridDescriptionForegroundBrush" ResourceKey="SystemControlForegroundBaseHighBrush" />
+            <StaticResource x:Key="PropertyGridErrorBorderBrush" ResourceKey="SystemControlForegroundBaseHighBrush" />
+            <StaticResource x:Key="PropertyGridErrorForegroundBrush" ResourceKey="SystemControlForegroundBaseHighBrush" />
+            <StaticResource x:Key="PropertyGridErrorBackgroundBrush" ResourceKey="SystemControlTransparentBrush" />
+            <StaticResource x:Key="PropertyGridColorSwatchBorderBrush" ResourceKey="SystemControlForegroundBaseHighBrush" />
+        </ResourceDictionary>
+
+    </ResourceDictionary.ThemeDictionaries>
+
+    <!-- Metrics. The same in every theme, so they sit in the root rather than in a theme dictionary. -->
+    <x:Double x:Key="PropertyGridRowHeight">28</x:Double>
+    <x:Double x:Key="PropertyGridCategoryHeaderHeight">30</x:Double>
+    <x:Double x:Key="PropertyGridNameColumnWidth">160</x:Double>
+    <x:Double x:Key="PropertyGridMinimumNameColumnWidth">48</x:Double>
+    <x:Double x:Key="PropertyGridMinimumValueColumnWidth">64</x:Double>
+    <x:Double x:Key="PropertyGridSplitterThickness">6</x:Double>
+    <x:Double x:Key="PropertyGridSplitterGripThickness">1</x:Double>
+    <x:Double x:Key="PropertyGridIndentSize">14</x:Double>
+    <x:Double x:Key="PropertyGridExpanderSize">16</x:Double>
+    <x:Double x:Key="PropertyGridDescriptionPaneHeight">64</x:Double>
+    <Thickness x:Key="PropertyGridNamePadding">6,0,6,0</Thickness>
+    <Thickness x:Key="PropertyGridEditorPadding">4,1,4,1</Thickness>
+    <Thickness x:Key="PropertyGridBorderThickness">1</Thickness>
+    <CornerRadius x:Key="PropertyGridCornerRadius">4</CornerRadius>
+
+    <!-- Glyphs, from the symbol font so they follow the shell rather than shipping as assets. -->
+    <FontFamily x:Key="PropertyGridIconFontFamily">Segoe Fluent Icons,Segoe MDL2 Assets</FontFamily>
+    <x:Double x:Key="PropertyGridIconFontSize">10</x:Double>
+    <x:String x:Key="PropertyGridExpandedGlyph">&#xE70D;</x:String>
+    <x:String x:Key="PropertyGridCollapsedGlyph">&#xE76C;</x:String>
+    <x:String x:Key="PropertyGridErrorGlyph">&#xE783;</x:String>
+    <x:String x:Key="PropertyGridResetGlyph">&#xE7A7;</x:String>
+    <x:String x:Key="PropertyGridEllipsisGlyph">&#xE712;</x:String>
+    <x:String x:Key="PropertyGridClearGlyph">&#xE711;</x:String>
+
+    <!-- Text styles, chained to the WinUI ones so they follow the type ramp. -->
+    <Style x:Key="PropertyGridNameTextStyle" BasedOn="{StaticResource BodyTextBlockStyle}" TargetType="TextBlock">
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="PropertyGridValueTextStyle" BasedOn="{StaticResource BodyTextBlockStyle}" TargetType="TextBlock">
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="PropertyGridCategoryTextStyle" BasedOn="{StaticResource BodyStrongTextBlockStyle}" TargetType="TextBlock">
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="PropertyGridDescriptionTextStyle" BasedOn="{StaticResource CaptionTextBlockStyle}" TargetType="TextBlock">
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+</ResourceDictionary>

@@ -223,20 +223,20 @@
             Text="{Binding Text, Mode=TwoWay}" />
     </DataTemplate>
 
+    <!--
+        A value with no text form worth typing. The button appears only when something is handling
+        EditRequested, so these read as plain summaries until an application offers a dialog.
+    -->
+    <DataTemplate x:Key="PropertyGridDialogEditorTemplate">
+        <primitives:PropertyGridDialogEditor />
+    </DataTemplate>
+
     <DataTemplate x:Key="PropertyGridComplexEditorTemplate">
-        <TextBlock
-            Padding="{ThemeResource PropertyGridEditorPadding}"
-            Foreground="{ThemeResource PropertyGridReadOnlyForegroundBrush}"
-            Style="{ThemeResource PropertyGridValueTextStyle}"
-            Text="{Binding Text}" />
+        <primitives:PropertyGridDialogEditor />
     </DataTemplate>
 
     <DataTemplate x:Key="PropertyGridCollectionEditorTemplate">
-        <TextBlock
-            Padding="{ThemeResource PropertyGridEditorPadding}"
-            Foreground="{ThemeResource PropertyGridReadOnlyForegroundBrush}"
-            Style="{ThemeResource PropertyGridValueTextStyle}"
-            Text="{Binding Text}" />
+        <primitives:PropertyGridDialogEditor />
     </DataTemplate>
 
     <DataTemplate x:Key="PropertyGridReadOnlyEditorTemplate">

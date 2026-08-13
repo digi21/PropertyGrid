@@ -37,6 +37,8 @@ public partial class PropertyGridPathEditor : Control
                 Row = row;
             }
         };
+
+        Loaded += (_, _) => UpdateButton();
     }
 
     /// <summary>Gets or sets the property being edited.</summary>
@@ -62,6 +64,21 @@ public partial class PropertyGridPathEditor : Control
         {
             browse.Click += OnBrowse;
         }
+
+        UpdateButton();
+    }
+
+    // Nothing handling BrowseRequested means the button cannot do anything, and an affordance that
+    // does nothing when pressed is worse than no affordance. Typing the path still works.
+    private void UpdateButton()
+    {
+        if (browse is null)
+        {
+            return;
+        }
+
+        bool offered = Row is { AllowsEditing: true } && this.FindAncestor<PropertyGrid>()?.CanBrowse == true;
+        browse.Visibility = offered ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void OnBrowse(object sender, RoutedEventArgs e)

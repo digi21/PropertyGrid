@@ -213,6 +213,14 @@ public partial class PropertyGrid : Control
     /// </remarks>
     public event EventHandler<PropertyGridBrowseRequestedEventArgs>? BrowseRequested;
 
+    /// <summary>Raised when the user asks to edit a value that needs more room than a row.</summary>
+    /// <remarks>
+    /// Lists and complex objects offer this by default, and any property can ask for it with
+    /// <c>[PropertyEditor(PropertyEditorKeys.Dialog)]</c>. The button does not appear at all unless
+    /// something is handling this, so a grid that offers no dialogs shows no dead buttons.
+    /// </remarks>
+    public event EventHandler<PropertyGridEditRequestedEventArgs>? EditRequested;
+
     /// <summary>Gets or sets the object whose properties are shown.</summary>
     public object? SelectedObject
     {
@@ -563,8 +571,17 @@ public partial class PropertyGrid : Control
         }
     }
 
+    // Whether an editor should offer its button at all. An affordance that does nothing when pressed
+    // is worse than no affordance, and lists get theirs without anybody asking for it.
+    internal bool CanBrowse => BrowseRequested is not null;
+
+    internal bool CanEdit => EditRequested is not null;
+
     internal void RaiseBrowseRequested(PropertyGridPropertyRow row, FilePathKind kind, IReadOnlyList<string> extensions) =>
         BrowseRequested?.Invoke(this, new PropertyGridBrowseRequestedEventArgs(row, kind, extensions));
+
+    internal void RaiseEditRequested(PropertyGridPropertyRow row) =>
+        EditRequested?.Invoke(this, new PropertyGridEditRequestedEventArgs(row));
 
     internal Microsoft.UI.Xaml.DataTemplate? RaiseEditorSelecting(PropertyGridPropertyRow row)
     {

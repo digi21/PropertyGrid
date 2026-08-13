@@ -19,6 +19,7 @@
     <Style BasedOn="{StaticResource DefaultPropertyGridDescriptionPaneStyle}" TargetType="primitives:PropertyGridDescriptionPane" />
     <Style BasedOn="{StaticResource DefaultPropertyGridColorEditorStyle}" TargetType="primitives:PropertyGridColorEditor" />
     <Style BasedOn="{StaticResource DefaultPropertyGridPathEditorStyle}" TargetType="primitives:PropertyGridPathEditor" />
+    <Style BasedOn="{StaticResource DefaultPropertyGridDialogEditorStyle}" TargetType="primitives:PropertyGridDialogEditor" />
 
     <!--
         The expander in the name cell. A toggle button with its chrome taken away: the default one
@@ -368,6 +369,54 @@
                             VerticalAlignment="Stretch"
                             Fill="{ThemeResource PropertyGridSplitterBrush}" />
                     </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="DefaultPropertyGridDialogEditorStyle" TargetType="primitives:PropertyGridDialogEditor">
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="primitives:PropertyGridDialogEditor">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <!--
+                            Read-only on purpose. What this editor is for is values with no text form
+                            worth typing - a list, an object, something only a dialog can express.
+                            A value you can type gets a text editor instead.
+                        -->
+                        <TextBlock
+                            Padding="{ThemeResource PropertyGridEditorPadding}"
+                            Foreground="{ThemeResource PropertyGridReadOnlyForegroundBrush}"
+                            IsTextSelectionEnabled="True"
+                            Style="{ThemeResource PropertyGridValueTextStyle}"
+                            Text="{Binding Text}" />
+
+                        <Button
+                            x:Name="PART_EditButton"
+                            Grid.Column="1"
+                            Width="28"
+                            MinWidth="0"
+                            Margin="2,0,0,0"
+                            Padding="0"
+                            VerticalAlignment="Stretch"
+                            AutomationProperties.Name="Edit"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            ToolTipService.ToolTip="Edit…"
+                            Visibility="Collapsed">
+                            <FontIcon
+                                FontFamily="{ThemeResource PropertyGridIconFontFamily}"
+                                FontSize="{ThemeResource PropertyGridIconFontSize}"
+                                Glyph="{ThemeResource PropertyGridEllipsisGlyph}" />
+                        </Button>
+                    </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

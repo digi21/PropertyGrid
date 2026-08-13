@@ -79,6 +79,35 @@ public sealed class PropertyGridPropertyRow : PropertyGridRow
     /// <summary>Gets a value indicating whether the editor accepts input, which is the opposite of <see cref="IsReadOnly"/>.</summary>
     public bool IsEditable => !IsReadOnly;
 
+    /// <summary>
+    /// Gets a value indicating whether an editor should offer to change the value at all, including
+    /// by changing what it holds rather than by replacing it.
+    /// </summary>
+    /// <remarks>
+    /// Not the same as <see cref="IsEditable"/>, and the difference matters for lists. A collection
+    /// is very often declared with only a getter — <c>public IList&lt;int&gt; Scales { get; } = [];</c>
+    /// — and is still meant to be edited, by adding to it rather than by assigning a new one. What
+    /// settles it is whether the grid was made read-only or the property was marked as such, not
+    /// whether it happens to have a setter.
+    /// </remarks>
+    public bool AllowsEditing
+    {
+        get
+        {
+            if (Source.IsReadOnly)
+            {
+                return false;
+            }
+
+            if (Description.GetAttribute<System.ComponentModel.ReadOnlyAttribute>() is { IsReadOnly: true })
+            {
+                return false;
+            }
+
+            return Description.GetAttribute<System.ComponentModel.DataAnnotations.EditableAttribute>() is not { AllowEdit: false };
+        }
+    }
+
     /// <summary>Gets or sets the value of the property.</summary>
     /// <remarks>
     /// Setting this runs the whole write path: coercion to the declared type, the validators, the

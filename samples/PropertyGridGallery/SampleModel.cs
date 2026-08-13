@@ -191,6 +191,10 @@ public class SampleModel : ObservableObject
     [Description("The server the layer comes from. Open it to edit its fields in place.")]
     public ServerSettings Server { get; } = new();
 
+    [Category("Appearance")]
+    [Description("The scales the layer is drawn at. A list, so it gets a summary and a button that asks the application to edit it.")]
+    public IList<int> Scales { get; } = [500, 1000, 5000];
+
     // No category, so it lands in Misc - which sorts last however the grid is arranged.
     [Description("Anything the application wants to hang off the layer.")]
     public string Tag

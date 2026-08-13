@@ -21,6 +21,9 @@ attributes already on your model, validated, and kept in step with the object as
   `long` staying away from a double-backed number box.
 - **Paths**, with a browse button that asks your application to open the dialog — it knows the
   filter, the starting folder and the window handle; a library does not.
+- **Dialogs for anything that needs one** — lists, complex objects, your own types. The grid shows a
+  summary and a `…`, raises an event, and stays out of the way. The button only appears if you are
+  listening.
 - **A resizable name column.** One splitter drags it in every row at once, at every level of nesting.
 - **Categories** that collapse, from `[Category]` or `[Display(GroupName)]`.
 - **The attributes you already have**: `[Browsable]`, `[Category]`, `[Description]`,
@@ -191,10 +194,10 @@ Or handle `AutoGeneratingProperty` per grid, or replace discovery entirely with 
 
 ## Not in this version
 
-- Editing the fields of a struct in place. A struct property shows its text form and does not open,
-  because a child row would write to a copy and the edit would be silently lost.
-- Adding to and removing from a collection. A list shows a summary; the dialog for editing one is
-  not written yet.
+- Opening a struct into child rows: a child row would write to a copy and the edit would be
+  silently lost. A struct shows its text form, and can be given a dialog editor instead.
+- A ready-made dialog for editing a list. The grid shows how many there are and offers the button;
+  what opens is up to you.
 - Showing several objects at once (`SelectedObjects`).
 - `IDictionary`.
 

@@ -31,6 +31,13 @@ public static class PropertyEditorKeys
     /// </summary>
     public const string Path = "PropertyGridPathEditorTemplate";
 
+    /// <summary>
+    /// A summary of the value with a button beside it, for anything that needs more room than a row.
+    /// The button raises <see cref="PropertyGrid.EditRequested"/>; the grid never opens a dialog
+    /// itself, and hides the button when nothing is listening.
+    /// </summary>
+    public const string Dialog = "PropertyGridDialogEditorTemplate";
+
     /// <summary>A number box, for the numeric types a <see cref="double"/> can hold exactly.</summary>
     public const string Number = "PropertyGridNumberEditorTemplate";
 

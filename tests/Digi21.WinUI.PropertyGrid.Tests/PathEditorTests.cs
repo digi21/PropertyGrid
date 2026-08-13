@@ -22,6 +22,9 @@ public class PathEditorTests
 
         [Description("An ordinary string, which must not get the browse button.")]
         public string Label { get; set; } = "not a path";
+
+        [PropertyEditor(PropertyEditorKeys.Dialog)]
+        public string Dialogged { get; set; } = "asked for a dialog";
     }
 
     private static PropertyDescription Describe(string name) =>
@@ -150,6 +153,75 @@ public class PathEditorTests
         row.Text = "|";
 
         Assert.False(row.HasErrors);
+    }
+
+    [Fact]
+    public void SummarisesAListByHowManyThingsAreInIt()
+    {
+        // Its own ToString is System.Collections.Generic.List`1[System.String], which tells the
+        // reader nothing they wanted to know.
+        PropertyGridSource source = new();
+        source.SetTarget(new CollectionHolder());
+
+        Assert.Equal("Count = 2", source.FindRow("Items")!.Text);
+    }
+
+    [Fact]
+    public void OffersTheDialogEditorToAListAndToAComplexObject()
+    {
+        ReflectionPropertyDescriptionProvider provider = new(new PropertyGridMetadata());
+
+        PropertyDescription items = provider.GetProperties(typeof(CollectionHolder)).Single();
+        PropertyDescription address = provider.GetProperties(typeof(NestedSubject)).Single(p => p.Name == "Address");
+
+        Assert.Equal(PropertyEditorKeys.Collection, BuiltInEditors.KeyFor(items, null));
+        Assert.Equal(PropertyEditorKeys.Complex, BuiltInEditors.KeyFor(address, null));
+    }
+
+    [Fact]
+    public void LetsAPropertyAskForTheDialogEditorByName()
+    {
+        Assert.Equal(PropertyEditorKeys.Dialog, Describe("Dialogged").EditorKey);
+    }
+
+    [Fact]
+    public void OffersToEditAListEvenThoughItHasNoSetter()
+    {
+        // The usual way to declare a collection is with only a getter, and it is still meant to be
+        // edited - by changing what is in it rather than by assigning a new one. Asking whether the
+        // property can be assigned would refuse almost every list there is.
+        PropertyGridSource source = new();
+        source.SetTarget(new LockedCollections());
+        PropertyGridPropertyRow row = source.FindRow("Open")!;
+
+        Assert.True(row.IsReadOnly);
+        Assert.True(row.AllowsEditing);
+    }
+
+    [Fact]
+    public void RefusesToEditWhatTheAuthorLockedOrTheGridFroze()
+    {
+        PropertyGridSource source = new();
+        source.SetTarget(new LockedCollections());
+
+        Assert.False(source.FindRow("Locked")!.AllowsEditing);
+        Assert.False(source.FindRow("NotEditable")!.AllowsEditing);
+        Assert.True(source.FindRow("Open")!.AllowsEditing);
+
+        source.IsReadOnly = true;
+
+        Assert.False(source.FindRow("Open")!.AllowsEditing);
+    }
+
+    private sealed class LockedCollections
+    {
+        [ReadOnly(true)]
+        public IList<int> Locked { get; } = [1];
+
+        [System.ComponentModel.DataAnnotations.Editable(false)]
+        public IList<int> NotEditable { get; } = [1];
+
+        public IList<int> Open { get; } = [1];
     }
 
     [Fact]

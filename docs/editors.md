@@ -26,8 +26,9 @@ Each row's value cell is a `DataTemplate` whose data context is the
 | a `Brush` | swatch opening a picker | `PropertyGridBrushEditorTemplate` |
 | `Thickness`, `CornerRadius`, `Point`, `Size`, `Rect` | text box | `PropertyGridStructEditorTemplate` |
 | a type whose converter has a fixed list of values | drop-down | `PropertyGridStandardValuesEditorTemplate` |
-| a list | a summary | `PropertyGridCollectionEditorTemplate` |
-| an object with properties | a summary, and a chevron in the name column | `PropertyGridComplexEditorTemplate` |
+| a list | a summary of how many, with a `…` button | `PropertyGridCollectionEditorTemplate` |
+| an object with properties | a summary with a `…` button, and a chevron in the name column | `PropertyGridComplexEditorTemplate` |
+| anything with `[PropertyEditor(PropertyEditorKeys.Dialog)]` | a summary with a `…` button | `PropertyGridDialogEditorTemplate` |
 | anything else | selectable text | `PropertyGridReadOnlyEditorTemplate` |
 
 Three of those are not the obvious choice, on purpose:
@@ -87,6 +88,57 @@ string to a `FileInfo` or `DirectoryInfo` property is converted for you.
 application; `arguments.Extensions` is what the attribute declared, each with its leading dot, or
 empty for anything. Typing a path by hand keeps working, which matters for a file that does not
 exist yet and for anyone pasting one in.
+
+## Values that need a dialog
+
+A list, a complex object, or anything asking for
+`[PropertyEditor(PropertyEditorKeys.Dialog)]` gets a summary of its value with a `…` button beside
+it — the grid's version of the modal editors a desktop property grid has always had.
+
+Same bargain as browsing: the grid offers the button, the application decides what opens.
+
+```csharp
+grid.EditRequested += async (_, arguments) =>
+{
+    if (arguments.Row.Value is IList<int> scales)
+    {
+        ScalesDialog dialog = new(scales) { XamlRoot = grid.XamlRoot };
+
+        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        {
+            arguments.Row.Refresh();   // edited in place
+        }
+    }
+};
+```
+
+Report the result by writing `Row.Value`, or — when the dialog edited the value in place, as a list
+usually is — by calling `Row.Refresh()`. Either way the handler may take as long as it needs; there
+is no deferral to acquire.
+
+**The button does not appear unless something is handling `EditRequested`**, so a grid that offers
+no dialogs shows no dead buttons. It also does not appear when the grid is read-only or the property
+is marked `[ReadOnly(true)]` or `[Editable(false)]`.
+
+What it does *not* check is whether the property has a setter, and that is deliberate. A collection
+is almost always declared with only a getter:
+
+```csharp
+public IList<int> Scales { get; } = [500, 1000, 5000];
+```
+
+and is still meant to be edited, by changing what is in it rather than by assigning a new one. The
+row exposes both questions: `IsEditable` for "can this be assigned", and `AllowsEditing` for "should
+an editor offer to change it at all".
+
+This is also the way to give a struct property a real editor. The grid will not open a struct into
+child rows — a child row would write to a copy and the edit would be lost — but a dialog that
+returns a whole new value works perfectly:
+
+```csharp
+[PropertyEditor(PropertyEditorKeys.Dialog)]
+public Thickness Margins { get; set; }
+```
 
 ## Replacing an editor everywhere
 

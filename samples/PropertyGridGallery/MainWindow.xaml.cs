@@ -78,6 +78,53 @@ public sealed partial class MainWindow : Window
             }
         };
 
+        // The same bargain as browsing: the grid offers the button, the application decides what
+        // opens. Here a list of numbers, but nothing stops it being a whole editor for a type only
+        // this application knows about.
+        Grid.EditRequested += async (_, arguments) =>
+        {
+            if (arguments.Row.Value is not IList<int> scales)
+            {
+                return;
+            }
+
+            TextBox box = new()
+            {
+                AcceptsReturn = true,
+                Text = string.Join(Environment.NewLine, scales),
+            };
+
+            ContentDialog dialog = new()
+            {
+                Title = arguments.Row.DisplayName,
+                Content = box,
+                PrimaryButtonText = "OK",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Primary,
+
+                // A ContentDialog with no XamlRoot throws in WinUI 3, and it is the single easiest
+                // thing to forget.
+                XamlRoot = Grid.XamlRoot,
+            };
+
+            if (await dialog.ShowAsync() != ContentDialogResult.Primary)
+            {
+                return;
+            }
+
+            scales.Clear();
+            foreach (string line in box.Text.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (int.TryParse(line.Trim(), CultureInfo.CurrentCulture, out int scale))
+                {
+                    scales.Add(scale);
+                }
+            }
+
+            // The list was edited in place rather than replaced, so the row is told to read it again.
+            arguments.Row.Refresh();
+        };
+
         Grid.PropertyValueChanged += (_, arguments) =>
         {
             changes++;

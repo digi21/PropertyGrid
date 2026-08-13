@@ -25,6 +25,11 @@ internal static class PropertyValueConverter
             // Spanish user sees "1.5" where they type "1,5" and the round trip stops working.
             case IFormattable formattable:
                 return formattable.ToString(null, culture);
+
+            // A list describes itself as System.Collections.Generic.List`1[System.String], which
+            // tells the reader nothing they wanted to know. How many there are does.
+            case System.Collections.ICollection collection:
+                return Strings.CollectionSummary(collection.Count);
         }
 
         string? described = value.ToString();

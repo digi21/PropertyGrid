@@ -47,6 +47,13 @@ API can still change. Builds before the tag are published as `0.1.0-dev.N`.
   `FileInfo` or `DirectoryInfo`. The button raises `BrowseRequested` carrying the kind of path and
   the extensions it accepts; the application opens whatever dialog is right and writes the row's
   value when the answer arrives. The grid never opens a file dialog itself.
+- A dialog editor — a summary with a `…` button — for lists, for complex objects, and for anything
+  asking for `[PropertyEditor(PropertyEditorKeys.Dialog)]`. The button raises `EditRequested`, and
+  does not appear at all unless something is handling it. It is also how a struct property gets a
+  real editor, since the grid will not open one into child rows.
+- `PropertyGridPropertyRow.AllowsEditing`, which asks whether an editor should offer to change a
+  value at all, as distinct from `IsEditable`, which asks whether the property can be assigned. A
+  list declared with only a getter is not assignable and is still meant to be edited.
 - `PropertyEditorTemplateMap`, registering an editor for a type, an interface and its
   implementations, or a name a property asks for.
 - Replacing a whole category of editors by redeclaring a `DataTemplate` under a
@@ -73,9 +80,10 @@ API can still change. Builds before the tag are published as `0.1.0-dev.N`.
 
 ### Known limitations
 
-- A struct property shows its text form and does not open into child rows: a child would write to a
-  copy and the edit would be silently lost.
-- A collection shows a summary; adding, removing and reordering are not implemented.
+- A struct property does not open into child rows: a child would write to a copy and the edit would
+  be silently lost. It shows its text form, and can be given a dialog editor instead.
+- No dialog is supplied for editing a list. The grid offers the button and the summary; what opens
+  is up to the application.
 - Showing several objects at once (`SelectedObjects`) is not implemented.
 - `IDictionary` is not handled specially.
 - No editor for `FontFamily`. The name `PropertyEditorKeys.FontFamily` is reserved so an application

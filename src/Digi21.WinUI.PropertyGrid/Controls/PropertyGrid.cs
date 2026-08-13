@@ -408,6 +408,65 @@ public partial class PropertyGrid : Control
         }
     }
 
+    /// <summary>Scrolls a row into view, realizing it first if the list had virtualized it away.</summary>
+    /// <param name="row">The row to show.</param>
+    public void ScrollIntoView(PropertyGridRow row)
+    {
+        ArgumentNullException.ThrowIfNull(row);
+
+        if (repeater is null)
+        {
+            return;
+        }
+
+        int index = IndexOf(row);
+        if (index < 0)
+        {
+            return;
+        }
+
+        // A row that has been scrolled past does not exist as an element, so asking the repeater to
+        // create it - and laying it out - has to happen before there is anything to bring into view.
+        UIElement element = repeater.GetOrCreateElement(index);
+        element.UpdateLayout();
+        element.StartBringIntoView();
+    }
+
+    internal void MoveSelection(PropertyGridRow from, int delta)
+    {
+        int index = IndexOf(from);
+        if (index < 0)
+        {
+            return;
+        }
+
+        MoveSelectionTo(Math.Clamp(index + delta, 0, source.Rows.Count - 1));
+    }
+
+    internal void MoveSelectionTo(int index)
+    {
+        if (index < 0 || index >= source.Rows.Count || repeater is null)
+        {
+            return;
+        }
+
+        PropertyGridRow target = source.Rows[index];
+
+        if (target is PropertyGridPropertyRow property)
+        {
+            SelectedRow = property;
+        }
+
+        ScrollIntoView(target);
+
+        if (repeater.TryGetElement(index) is Control focusable)
+        {
+            focusable.Focus(FocusState.Keyboard);
+        }
+    }
+
+    internal int LastRowIndex => source.Rows.Count - 1;
+
     /// <summary>Forgets the editors it resolved, so every row picks one again.</summary>
     /// <remarks>Call this after registering editors, or after replacing an editor template in the application's resources.</remarks>
     public void InvalidateEditors()
@@ -646,6 +705,19 @@ public partial class PropertyGrid : Control
         {
             SelectedRow = null;
         }
+    }
+
+    private int IndexOf(PropertyGridRow row)
+    {
+        for (int index = 0; index < source.Rows.Count; index++)
+        {
+            if (ReferenceEquals(source.Rows[index], row))
+            {
+                return index;
+            }
+        }
+
+        return -1;
     }
 
     private void OnSelectedRowChanged()

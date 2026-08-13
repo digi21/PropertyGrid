@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
+using Windows.System;
 
 namespace Digi21.WinUI.PropertyGrid.Primitives;
 
@@ -116,6 +117,59 @@ public partial class PropertyGridRowPresenter : Control
     {
         base.OnPointerPressed(e);
         Select();
+    }
+
+    /// <inheritdoc />
+    protected override void OnKeyDown(KeyRoutedEventArgs e)
+    {
+        base.OnKeyDown(e);
+
+        // Only when the row itself has focus. Once the caret is in a text box, the arrow keys belong
+        // to the caret, and a grid that steals them to move between rows is unusable.
+        if (!ReferenceEquals(e.OriginalSource, this) || Owner is not { } owner || Row is not { } row)
+        {
+            return;
+        }
+
+        switch (e.Key)
+        {
+            case VirtualKey.Up:
+                owner.MoveSelection(row, -1);
+                e.Handled = true;
+                break;
+
+            case VirtualKey.Down:
+                owner.MoveSelection(row, 1);
+                e.Handled = true;
+                break;
+
+            case VirtualKey.Home:
+                owner.MoveSelectionTo(0);
+                e.Handled = true;
+                break;
+
+            case VirtualKey.End:
+                owner.MoveSelectionTo(owner.LastRowIndex);
+                e.Handled = true;
+                break;
+
+            case VirtualKey.Left when row.IsExpanded:
+                row.IsExpanded = false;
+                e.Handled = true;
+                break;
+
+            case VirtualKey.Right when row is { IsExpandable: true, IsExpanded: false }:
+                row.IsExpanded = true;
+                e.Handled = true;
+                break;
+
+            case VirtualKey.F2:
+            case VirtualKey.Enter:
+                // Into the editor. Getting back out is Escape, which the text behaviours handle by
+                // reverting, and Shift+Tab, which the focus order already covers.
+                e.Handled = editorHost?.FindDescendant<Control>()?.Focus(FocusState.Keyboard) == true;
+                break;
+        }
     }
 
     /// <inheritdoc />
@@ -282,3 +336,4 @@ public partial class PropertyGridRowPresenter : Control
         Owner = null;
     }
 }
+

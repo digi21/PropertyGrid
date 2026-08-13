@@ -163,8 +163,9 @@
     <Style x:Key="DefaultPropertyGridRowPresenterStyle" TargetType="primitives:PropertyGridRowPresenter">
         <Setter Property="Height" Value="{ThemeResource PropertyGridRowHeight}" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-        <Setter Property="IsTabStop" Value="False" />
-        <Setter Property="UseSystemFocusVisuals" Value="False" />
+        <!-- Rows take focus so the keyboard can reach them, and show where it is when it does. -->
+        <Setter Property="IsTabStop" Value="True" />
+        <Setter Property="UseSystemFocusVisuals" Value="True" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="primitives:PropertyGridRowPresenter">
@@ -474,3 +475,4 @@
     </Style>
 
 </ResourceDictionary>
+

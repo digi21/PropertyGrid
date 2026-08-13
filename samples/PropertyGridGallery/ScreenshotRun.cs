@@ -1,11 +1,15 @@
+using System.Runtime.InteropServices.WindowsRuntime;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
+using Windows.Graphics.Imaging;
+using Windows.Storage.Streams;
 
 namespace PropertyGridGallery;
 
 // Opens the gallery, lets it settle, saves a picture of it and exits. Run it with:
 //
-//     dotnet run --project samples/PropertyGridGallery -- --screenshot gallery.png [dark]
+//     dotnet run --project samples/PropertyGridGallery -- --screenshot gallery.png [light|dark]
 //
 // It is how the picture in the README is produced, and how a layout change can be checked without
 // somebody sitting in front of the window.
@@ -26,6 +30,30 @@ internal sealed class ScreenshotRun(string outputPath, ElementTheme theme)
         window.AppWindow.Resize(new Windows.Graphics.SizeInt32(1180, 1180));
         window.Activate();
         CompositionTarget.Rendering += OnRendering;
+    }
+
+    private static async Task CaptureAsync(FrameworkElement element, string path)
+    {
+        RenderTargetBitmap bitmap = new();
+        await bitmap.RenderAsync(element);
+
+        IBuffer pixels = await bitmap.GetPixelsAsync();
+
+        using InMemoryRandomAccessStream stream = new();
+        BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId, stream);
+        encoder.SetPixelData(
+            BitmapPixelFormat.Bgra8,
+            BitmapAlphaMode.Premultiplied,
+            (uint)bitmap.PixelWidth,
+            (uint)bitmap.PixelHeight,
+            96,
+            96,
+            pixels.ToArray());
+        await encoder.FlushAsync();
+
+        using Stream managed = stream.AsStreamForRead();
+        using FileStream file = File.Create(path);
+        await managed.CopyToAsync(file);
     }
 
     private async void OnRendering(object? sender, object e)
@@ -55,7 +83,7 @@ internal sealed class ScreenshotRun(string outputPath, ElementTheme theme)
 
         try
         {
-            await Diagnostics.CaptureAsync(window, content, outputPath);
+            await CaptureAsync(content, outputPath);
         }
         finally
         {

@@ -189,12 +189,12 @@
                                 <VisualState x:Name="Normal" />
                                 <VisualState x:Name="PointerOver">
                                     <VisualState.Setters>
-                                        <Setter Target="Root.Background" Value="{ThemeResource PropertyGridRowPointerOverBackgroundBrush}" />
+                                        <Setter Target="StateOverlay.Background" Value="{ThemeResource PropertyGridRowPointerOverBackgroundBrush}" />
                                     </VisualState.Setters>
                                 </VisualState>
                                 <VisualState x:Name="Selected">
                                     <VisualState.Setters>
-                                        <Setter Target="Root.Background" Value="{ThemeResource PropertyGridRowSelectedBackgroundBrush}" />
+                                        <Setter Target="StateOverlay.Background" Value="{ThemeResource PropertyGridRowSelectedBackgroundBrush}" />
                                     </VisualState.Setters>
                                 </VisualState>
                             </VisualStateGroup>
@@ -229,6 +229,14 @@
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
 
+                        <Grid>
+                        <!--
+                            The pointer and selection tints go here rather than on the row itself, so
+                            that a row painted its own colour keeps it when the pointer goes near.
+                            Bottom of the stack, so it sits behind the cells.
+                        -->
+                        <Border x:Name="StateOverlay" Background="Transparent" />
+
                         <!--
                             Three cells, laid out by position rather than by a Grid: a repeater
                             measures every row on its own and WinUI has neither a shared size scope
@@ -251,6 +259,15 @@
                                             Foreground="{ThemeResource PropertyGridExpanderGlyphBrush}"
                                             Glyph="{ThemeResource PropertyGridCollapsedGlyph}" />
                                     </ToggleButton>
+
+                                    <!-- Whatever glyph the description asked for, if it asked. -->
+                                    <FontIcon
+                                        x:Name="PART_Glyph"
+                                        Margin="0,0,4,0"
+                                        VerticalAlignment="Center"
+                                        FontFamily="{ThemeResource PropertyGridIconFontFamily}"
+                                        FontSize="{ThemeResource PropertyGridIconFontSize}"
+                                        Visibility="Collapsed" />
 
                                     <FontIcon
                                         x:Name="PART_ErrorIcon"
@@ -285,6 +302,7 @@
                                     VerticalContentAlignment="Center" />
                             </Border>
                         </primitives:PropertyGridRowPanel>
+                        </Grid>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
@@ -484,7 +502,7 @@
     </Style>
 
     <Style x:Key="DefaultPropertyGridColorEditorStyle" TargetType="primitives:PropertyGridColorEditor">
-        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="IsTabStop" Value="False" />
         <Setter Property="Template">
@@ -497,7 +515,24 @@
                         The button sits on top, transparent, and only provides the border and the
                         flyout.
                     -->
-                    <Grid Width="40" Height="20">
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!--
+                            The swatch alone says which colour it roughly is; the numbers beside it
+                            say which colour it exactly is, and that is what somebody matching two
+                            things needs.
+                        -->
+                        <TextBlock
+                            x:Name="PART_Text"
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Style="{ThemeResource PropertyGridValueTextStyle}" />
+
+                        <Grid Width="40" Height="20">
                         <!--
                             A light backdrop under the swatch, so a colour with alpha reads as
                             translucent rather than as a slightly different opaque colour.
@@ -539,6 +574,7 @@
                                 </Flyout>
                             </Button.Flyout>
                         </Button>
+                        </Grid>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>

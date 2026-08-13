@@ -83,6 +83,35 @@ public sealed record PropertyDescription
     /// <summary>Gets the attributes declared on the property, for validation and for editors to read.</summary>
     public IReadOnlyList<Attribute> Attributes { get; init; } = [];
 
+    /// <summary>Gets a glyph to show before the name, from the symbol font.</summary>
+    /// <remarks>
+    /// A character such as <c>""</c>. Icons ship as a font rather than as images so that they
+    /// follow the shell and the theme, and so that a description can carry one without the library
+    /// having to know anything about assets.
+    /// </remarks>
+    public string? Glyph { get; init; }
+
+    /// <summary>Gets the name of the brush to paint the property's name with, or <see langword="null"/> for the usual one.</summary>
+    /// <remarks>
+    /// A resource key rather than a brush, so that a description stays a plain object and the colour
+    /// still follows the theme. Any key the application's resources hold will do.
+    /// </remarks>
+    public string? NameBrushKey { get; init; }
+
+    /// <summary>Gets the name of the brush to paint the property's value with, or <see langword="null"/> for the usual one.</summary>
+    public string? ValueBrushKey { get; init; }
+
+    /// <summary>Gets the name of the brush to paint the whole row with, or <see langword="null"/> for the usual one.</summary>
+    public string? RowBrushKey { get; init; }
+
+    /// <summary>Gets a value indicating whether the editor takes the whole row, with no name beside it.</summary>
+    /// <remarks>
+    /// For a property whose editor is the point and whose name would only be in the way — a preview
+    /// strip, a gradient, a bank of buttons. The splitter still sits where it always did, so the
+    /// rows around it stay lined up.
+    /// </remarks>
+    public bool IsFullWidth { get; init; }
+
     /// <summary>Gets the values this particular property accepts, or <see langword="null"/> to ask its type.</summary>
     /// <remarks>
     /// <para>

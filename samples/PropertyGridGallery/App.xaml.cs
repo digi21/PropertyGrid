@@ -5,7 +5,6 @@ namespace PropertyGridGallery;
 public partial class App : Application
 {
     private Window? window;
-    private Diagnostics? diagnostics;
     private ScreenshotRun? screenshot;
 
     public App()
@@ -19,15 +18,7 @@ public partial class App : Application
         // writes the answers to a file and exits. See Diagnostics.cs.
         string[] arguments = Environment.GetCommandLineArgs();
 
-        int flag = Array.IndexOf(arguments, "--diagnose");
-        if (flag >= 0 && flag + 1 < arguments.Length)
-        {
-            diagnostics = new Diagnostics(arguments[flag + 1]);
-            diagnostics.Run();
-            return;
-        }
-
-        flag = Array.IndexOf(arguments, "--screenshot");
+        int flag = Array.IndexOf(arguments, "--screenshot");
         if (flag >= 0 && flag + 1 < arguments.Length)
         {
             ElementTheme theme = arguments.Contains("dark")

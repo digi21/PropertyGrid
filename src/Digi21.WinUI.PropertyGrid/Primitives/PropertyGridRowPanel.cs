@@ -58,6 +58,22 @@ public partial class PropertyGridRowPanel : Panel
         set => SetValue(GutterWidthProperty, value);
     }
 
+    /// <summary>Identifies the <see cref="IsFullWidth"/> dependency property.</summary>
+    public static readonly DependencyProperty IsFullWidthProperty = DependencyProperty.Register(
+        nameof(IsFullWidth),
+        typeof(bool),
+        typeof(PropertyGridRowPanel),
+        new PropertyMetadata(false, (d, _) => ((PropertyGridRowPanel)d).InvalidateMeasure()));
+
+    /// <summary>Gets or sets a value indicating whether the editor takes the whole row.</summary>
+    /// <remarks>The name cell and the gutter are given no width at all rather than being hidden, so
+    /// a replacement row template needs to know nothing about this.</remarks>
+    public bool IsFullWidth
+    {
+        get => (bool)GetValue(IsFullWidthProperty);
+        set => SetValue(IsFullWidthProperty, value);
+    }
+
     /// <summary>Gets or sets how far the name cell is pushed in to show how deeply the row is nested.</summary>
     /// <remarks>
     /// Nesting eats into the name cell and never moves the split, so the two columns stay lined up at
@@ -83,24 +99,26 @@ public partial class PropertyGridRowPanel : Panel
         // what its children want so it is at least not zero-sized.
         bool bounded = !double.IsInfinity(availableSize.Width);
         double width = bounded ? availableSize.Width : 0.0;
+        double split = IsFullWidth ? 0 : NameWidth;
+        double gutterWidth = IsFullWidth ? 0 : GutterWidth;
 
         double nameWidth = bounded
-            ? Math.Max(0, Math.Min(NameWidth, width) - Indent)
+            ? Math.Max(0, Math.Min(split, width) - Indent)
             : double.PositiveInfinity;
 
         name?.Measure(new Size(nameWidth, availableSize.Height));
         NaturalNameWidth = (name?.DesiredSize.Width ?? 0) + Indent;
 
-        gutter?.Measure(new Size(GutterWidth, availableSize.Height));
+        gutter?.Measure(new Size(gutterWidth, availableSize.Height));
 
         double editorWidth = bounded
-            ? Math.Max(0, width - NameWidth - GutterWidth)
+            ? Math.Max(0, width - split - gutterWidth)
             : double.PositiveInfinity;
         editor?.Measure(new Size(editorWidth, availableSize.Height));
 
         if (!bounded)
         {
-            width = NaturalNameWidth + GutterWidth + (editor?.DesiredSize.Width ?? 0);
+            width = NaturalNameWidth + gutterWidth + (editor?.DesiredSize.Width ?? 0);
         }
 
         double height = Math.Max(
@@ -114,14 +132,18 @@ public partial class PropertyGridRowPanel : Panel
     protected override Size ArrangeOverride(Size finalSize)
     {
         (UIElement? name, UIElement? gutter, UIElement? editor) = Cells();
-        double split = Math.Clamp(NameWidth, 0, finalSize.Width);
+
+        // A full-width row gives the name and the gutter no width at all rather than hiding them, so
+        // a replacement row template needs to know nothing about any of this.
+        double split = IsFullWidth ? 0 : Math.Clamp(NameWidth, 0, finalSize.Width);
+        double gutterWidth = IsFullWidth ? 0 : GutterWidth;
 
         name?.Arrange(new Rect(Indent, 0, Math.Max(0, split - Indent), finalSize.Height));
-        gutter?.Arrange(new Rect(split, 0, Math.Min(GutterWidth, Math.Max(0, finalSize.Width - split)), finalSize.Height));
+        gutter?.Arrange(new Rect(split, 0, Math.Min(gutterWidth, Math.Max(0, finalSize.Width - split)), finalSize.Height));
         editor?.Arrange(new Rect(
-            Math.Min(split + GutterWidth, finalSize.Width),
+            Math.Min(split + gutterWidth, finalSize.Width),
             0,
-            Math.Max(0, finalSize.Width - split - GutterWidth),
+            Math.Max(0, finalSize.Width - split - gutterWidth),
             finalSize.Height));
 
         return finalSize;

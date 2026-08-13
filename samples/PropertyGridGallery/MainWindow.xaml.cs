@@ -151,14 +151,41 @@ public sealed partial class MainWindow : Window
 
     internal void ToggleThemeForPicture() => OnToggleTheme(this, new RoutedEventArgs());
 
-    // Reached from a Click in the editor template above. The data context of an editor template is
-    // the row, so the button knows which property it belongs to without being told.
+    // Reached from a Click in the editor template. The data context of an editor template is the
+    // row, so a handler knows which property it was pressed for without being told.
     private void OnResetOpacity(object sender, RoutedEventArgs e)
     {
         if (sender is FrameworkElement { DataContext: PropertyGridPropertyRow row })
         {
             row.Value = 80;
             Trace.Text = $"Reset {row.DisplayName} from a button inside its editor.";
+        }
+    }
+
+    // Which radio is filled in. There is no converter to bind IsChecked through, and a sample that
+    // writes the value but never shows it is worse than no sample.
+    private void OnQualityLoaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is RadioButton { DataContext: PropertyGridPropertyRow row, Tag: string option } radio)
+        {
+            radio.IsChecked = string.Equals(option, row.Text, StringComparison.Ordinal);
+        }
+    }
+
+    private void OnQualityChosen(object sender, RoutedEventArgs e)
+    {
+        if (sender is RadioButton { DataContext: PropertyGridPropertyRow row, Tag: string chosen })
+        {
+            row.Text = chosen;
+        }
+    }
+
+    private async void OnOpenDocumentation(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: PropertyGridPropertyRow row }
+            && Uri.TryCreate(row.Text, UriKind.Absolute, out Uri? target))
+        {
+            await Windows.System.Launcher.LaunchUriAsync(target);
         }
     }
 
@@ -178,7 +205,7 @@ public sealed partial class MainWindow : Window
         // Nothing tells the grid about this. It hears about it because the model raises
         // PropertyChanged and the grid is listening - weakly.
         Model.Opacity = Random.Shared.Next(0, 101);
-        Model.Name = "Parcels " + Random.Shared.Next(100, 999);
+        Model.Text = "Changed " + Random.Shared.Next(100, 999);
         Model.Server.Port = Random.Shared.Next(1, 65536);
     }
 

@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using Windows.System;
 
 namespace Digi21.WinUI.PropertyGrid.Primitives;
@@ -266,6 +267,54 @@ public partial class PropertyGridRowPresenter : Control
         rowPanel.NameWidth = observed?.NameColumnWidth ?? 160.0;
         rowPanel.GutterWidth = PropertyGridThemeResources.Value("PropertyGridSplitterThickness", 6.0);
         rowPanel.Indent = (Row?.Depth ?? 0) * (observed?.IndentSize ?? 14.0);
+        rowPanel.IsFullWidth = Row?.Description.IsFullWidth == true;
+
+        ApplyDecoration();
+    }
+
+    // The glyph and the brushes a description asked for. All optional, and all resolved by name
+    // rather than handed over as objects, so the description stays a plain object and the colours
+    // still follow the theme.
+    private void ApplyDecoration()
+    {
+        if (GetTemplateChild("PART_Glyph") is FontIcon glyph)
+        {
+            string? wanted = Row?.Description.Glyph;
+            glyph.Glyph = wanted ?? string.Empty;
+            glyph.Visibility = string.IsNullOrEmpty(wanted) ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        Paint(GetTemplateChild("PART_NameText"), TextBlock.ForegroundProperty, Row?.Description.NameBrushKey);
+        Paint(GetTemplateChild("PART_EditorHost"), ContentPresenter.ForegroundProperty, Row?.Description.ValueBrushKey);
+
+        // The row itself is the bottom layer. The states tint a translucent overlay above it rather
+        // than this, or a row that asked for its own colour would lose it the moment the pointer
+        // went near it.
+        Paint(GetTemplateChild("Root"), Border.BackgroundProperty, Row?.Description.RowBrushKey);
+    }
+
+    // Sets a brush the description asked for, and gets out of the way when it asked for nothing.
+    //
+    // Clearing rather than assigning a default matters twice over. A recycled row has to lose the
+    // colour the last one wanted; and the value underneath is a {ThemeResource} from the template,
+    // which follows the element's theme - while a brush looked up from Application.Resources in code
+    // is whichever theme happened to be current, so writing one back would paint dark-theme text on
+    // a light window.
+    private static void Paint(DependencyObject? part, DependencyProperty property, string? key)
+    {
+        if (part is null)
+        {
+            return;
+        }
+
+        if (!string.IsNullOrEmpty(key) && PropertyGridThemeResources.Value<Brush?>(key, null) is { } wanted)
+        {
+            part.SetValue(property, wanted);
+        }
+        else
+        {
+            part.ClearValue(property);
+        }
     }
 
     private void ApplyEditor()

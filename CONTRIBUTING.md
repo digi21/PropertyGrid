@@ -50,19 +50,26 @@ Control templates, splitter dragging, focus and keyboard behaviour, and the visu
 are validated by running the gallery and trying them. Please say in the pull request what you tried
 by hand.
 
-Two things the gallery can answer without a person watching:
+The gallery can take its own picture, which is how the image in the README is produced and a quick
+way to see that a layout change did not collapse something:
 
 ```
 dotnet run --project samples/PropertyGridGallery -- --screenshot gallery.png light
-dotnet run --project samples/PropertyGridGallery -- --diagnose report.txt
 ```
 
-The first opens the gallery, lets it settle, saves a picture and exits — how the image in the README
-is produced, and a quick way to see that a layout change did not collapse something. The second puts
-four hundred rows through the repeater, scrolls them, and reports what actually happened: how many
-elements were realized, how often they were recycled, and whether the content presenter kept the
-editor it had already built. Those are the questions the design rests on and the ones no unit test
-can reach; if you change how rows are realized, run it and put the numbers in the pull request.
+For the questions a picture cannot answer — does the repeater really virtualize, does it recycle
+rather than rebuild, how tall is a row, and above all *does anything write to the model while nobody
+is typing* — there is a separate throwaway application, **PropertyGridProbe**. It is not in this
+repository on purpose: it is scaffolding, not a sample, and nobody cloning the library wants it. It
+references this one by source, so clone it next door and run:
+
+```
+dotnet run --project ../PropertyGridProbe -- --diagnose report.txt
+```
+
+If you change how rows are realized, run it and put the numbers in the pull request. And when you add
+a measurement there to catch a specific bug, take the fix out and check that the probe reports it —
+a harness that always says zero is not evidence of anything.
 
 Two rules keep the tests possible, and both are easy to break by accident:
 

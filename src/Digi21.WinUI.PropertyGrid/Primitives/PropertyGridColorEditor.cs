@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -33,6 +34,7 @@ public partial class PropertyGridColorEditor : Control
     private Button? cancel;
     private Button? open;
     private Shape? swatch;
+    private TextBlock? summary;
     private PropertyGridPropertyRow? subscribed;
 
     /// <summary>Initializes a new instance of the <see cref="PropertyGridColorEditor"/> class.</summary>
@@ -70,6 +72,7 @@ public partial class PropertyGridColorEditor : Control
 
         open = GetTemplateChild("PART_OpenButton") as Button;
         swatch = GetTemplateChild("PART_Swatch") as Shape;
+        summary = GetTemplateChild("PART_Text") as TextBlock;
 
         // The flyout has not built its content yet, and when it does that content lives in its own
         // namescope, so its parts are found on opening rather than here.
@@ -184,6 +187,17 @@ public partial class PropertyGridColorEditor : Control
 
         Color? current = ColorOf(Row?.Value);
         swatch.Fill = current is { } colour ? new SolidColorBrush(colour) : null;
+
+        if (summary is not null)
+        {
+            // The channels rather than #AARRGGBB: somebody matching two colours reads them off a
+            // picker in decimal, and the alpha is only worth the space when there is any.
+            summary.Text = current is { } shown
+                ? shown.A == 255
+                    ? string.Format(CultureInfo.CurrentCulture, "{0}; {1}; {2}", shown.R, shown.G, shown.B)
+                    : string.Format(CultureInfo.CurrentCulture, "{0}; {1}; {2}; {3}", shown.R, shown.G, shown.B, shown.A)
+                : string.Empty;
+        }
     }
 
     private void Detach()

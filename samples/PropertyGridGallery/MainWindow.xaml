@@ -9,12 +9,6 @@
         Padding="12"
         Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
         RowSpacing="8">
-        <Grid.Resources>
-            <!--
-                A custom editor for one type, declared entirely in markup. The data context of the
-                template is the PropertyGridPropertyRow, so it binds the typed properties on the row.
-            -->
-        </Grid.Resources>
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -25,11 +19,11 @@
         <StackPanel Orientation="Horizontal" Spacing="8">
             <ComboBox
                 x:Name="SortBox"
-                SelectionChanged="OnSortChanged"
-                Width="220" />
+                Width="220"
+                SelectionChanged="OnSortChanged" />
             <Button Click="OnChangeFromOutside" Content="Change the object from code" />
-            <Button Click="OnExpandAll" Content="Expand categories" />
-            <Button Click="OnCollapseAll" Content="Collapse categories" />
+            <Button Click="OnExpandAll" Content="Expand" />
+            <Button Click="OnCollapseAll" Content="Collapse" />
             <ToggleButton x:Name="ReadOnlyToggle" Click="OnToggleReadOnly" Content="Read only" />
             <Button Click="OnToggleTheme" Content="Toggle theme" />
         </StackPanel>
@@ -39,8 +33,15 @@
             Grid.Row="1"
             SelectedObject="{x:Bind Model}"
             ShowSearchBox="True">
+
+            <!--
+                Every editor below is an ordinary DataTemplate over the row. Handlers work because
+                these live in the namescope of a page that has code behind it - the library's own
+                templates are in a resource dictionary, which cannot have any.
+            -->
             <pg:PropertyGrid.EditorTemplates>
                 <pg:PropertyEditorTemplateMap>
+
                     <pg:PropertyEditorTemplate Key="Percent">
                         <DataTemplate>
                             <Grid ColumnSpacing="8">
@@ -58,22 +59,125 @@
                                     Grid.Column="1"
                                     VerticalAlignment="Center"
                                     Text="{Binding Text}" />
-
-                                <!--
-                                    A handler in an editor template. The library's own templates
-                                    cannot do this - a DataTemplate in a resource dictionary has no
-                                    code behind it - but an application's can, because this one is
-                                    in the namescope of a page that does.
-                                -->
                                 <Button
                                     Grid.Column="2"
-                                    Margin="8,0,0,0"
+                                    Margin="4,0,0,0"
                                     Padding="6,0,6,0"
                                     Click="OnResetOpacity"
                                     Content="Reset" />
                             </Grid>
                         </DataTemplate>
                     </pg:PropertyEditorTemplate>
+
+                    <pg:PropertyEditorTemplate Key="SpinAndSlider">
+                        <DataTemplate>
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Slider
+                                    Maximum="100"
+                                    Minimum="0"
+                                    Value="{Binding DoubleValue, Mode=TwoWay}" />
+                                <NumberBox
+                                    Grid.Column="1"
+                                    Width="96"
+                                    MinHeight="0"
+                                    SpinButtonPlacementMode="Compact"
+                                    Value="{Binding DoubleValue, Mode=TwoWay}" />
+                            </Grid>
+                        </DataTemplate>
+                    </pg:PropertyEditorTemplate>
+
+                    <pg:PropertyEditorTemplate Key="Masked">
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Foreground="{ThemeResource PropertyGridReadOnlyForegroundBrush}"
+                                    Text="Phone No:" />
+                                <TextBox
+                                    MinWidth="140"
+                                    MinHeight="0"
+                                    BorderThickness="0"
+                                    Text="{Binding Text, Mode=TwoWay}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </pg:PropertyEditorTemplate>
+
+                    <pg:PropertyEditorTemplate Key="Address">
+                        <DataTemplate>
+                            <TextBox
+                                MinHeight="0"
+                                BorderThickness="0"
+                                InputScope="Digits"
+                                PlaceholderText="0.0.0.0"
+                                Text="{Binding Text, Mode=TwoWay}" />
+                        </DataTemplate>
+                    </pg:PropertyEditorTemplate>
+
+                    <pg:PropertyEditorTemplate Key="UpperCase">
+                        <DataTemplate>
+                            <TextBox
+                                MinHeight="0"
+                                BorderThickness="0"
+                                CharacterCasing="Upper"
+                                Text="{Binding Text, Mode=TwoWay}" />
+                        </DataTemplate>
+                    </pg:PropertyEditorTemplate>
+
+                    <pg:PropertyEditorTemplate Key="Consent">
+                        <DataTemplate>
+                            <CheckBox
+                                MinWidth="0"
+                                MinHeight="0"
+                                Margin="6,0,0,0"
+                                Content="I agree to the conditions"
+                                IsChecked="{Binding NullableBoolValue, Mode=TwoWay}"
+                                IsEnabled="{Binding IsEditable}" />
+                        </DataTemplate>
+                    </pg:PropertyEditorTemplate>
+
+                    <!-- A group of radios. The row grows for it, because rows are not a fixed height. -->
+                    <pg:PropertyEditorTemplate Key="Radios">
+                        <DataTemplate>
+                            <StackPanel Margin="6,2,0,2">
+                                <RadioButton
+                                    MinHeight="0"
+                                    Checked="OnQualityChosen"
+                                    Loaded="OnQualityLoaded"
+                                    Content="Draft"
+                                    GroupName="Quality"
+                                    Tag="Draft" />
+                                <RadioButton
+                                    MinHeight="0"
+                                    Checked="OnQualityChosen"
+                                    Loaded="OnQualityLoaded"
+                                    Content="Balanced"
+                                    GroupName="Quality"
+                                    Tag="Balanced" />
+                                <RadioButton
+                                    MinHeight="0"
+                                    Checked="OnQualityChosen"
+                                    Loaded="OnQualityLoaded"
+                                    Content="Best"
+                                    GroupName="Quality"
+                                    Tag="Best" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </pg:PropertyEditorTemplate>
+
+                    <pg:PropertyEditorTemplate Key="Hyperlink">
+                        <DataTemplate>
+                            <HyperlinkButton
+                                MinHeight="0"
+                                Padding="4,0,4,0"
+                                Click="OnOpenDocumentation"
+                                Content="Read the documentation" />
+                        </DataTemplate>
+                    </pg:PropertyEditorTemplate>
+
                 </pg:PropertyEditorTemplateMap>
             </pg:PropertyGrid.EditorTemplates>
         </pg:PropertyGrid>
@@ -86,4 +190,3 @@
             Text="Ready." />
     </Grid>
 </Window>
-

@@ -119,6 +119,31 @@ so setting `NameColumnWidth` on a grid directly still wins over them.
 are read from code as well as from templates — the layout cannot express them — so replacing them
 takes effect the next time a row is laid out.
 
+## Words
+
+Everything the templates put on screen is a resource key, replaced the same way a brush is:
+
+| Key | Defaults to |
+|---|---|
+| `PropertyGridSearchPlaceholderText` | `Search properties` |
+| `PropertyGridBrowseToolTipText` | `Browse…` |
+| `PropertyGridEditToolTipText` | `Edit…` |
+| `PropertyGridOkButtonText` | `OK` |
+| `PropertyGridCancelButtonText` | `Cancel` |
+
+The sentences the grid builds at run time — why an edit was rejected, how a list is summarised, the
+name of the catch-all category — are not in a template and cannot be resource keys. They live on
+`PropertyGridStrings`, which is public and settable:
+
+```csharp
+PropertyGridStrings.DefaultCategoryName = Loc("Varios");
+PropertyGridStrings.NotAValidFormat = Loc("'{0}' no es un {1} válido.");
+PropertyGridStrings.WholeNumberName = Loc("número entero");
+```
+
+Set them once, early. `PropertyGrid.Culture` and `PropertyGrid.DefaultCategoryName` are per grid,
+for an application that chooses its own language rather than following Windows.
+
 ## Icons and text
 
 Glyphs come from the symbol font, so they follow the shell rather than shipping as assets:

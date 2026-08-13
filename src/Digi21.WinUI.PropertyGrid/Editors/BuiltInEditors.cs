@@ -24,6 +24,21 @@ internal static class BuiltInEditors
             return PropertyEditorKeys.Path;
         }
 
+        // A description that named the values it accepts has said everything: it beats the type,
+        // which can only speak for every property of that type at once.
+        if (description.StandardValues is { Count: > 0 })
+        {
+            return PropertyEditorKeys.StandardValues;
+        }
+
+        // A property declared as object, as an interface or as an abstract class says almost nothing
+        // about what to edit; what is in it right now says everything. Answering the same question
+        // about the runtime type keeps every rule below in one place instead of two.
+        if (runtimeType is not null && runtimeType != underlying && IsVague(underlying))
+        {
+            return KeyFor(description with { PropertyType = runtimeType }, runtimeType: null);
+        }
+
         if (underlying.IsEnum)
         {
             return EnumInfo.IsFlags(underlying) ? PropertyEditorKeys.FlagsEnum : PropertyEditorKeys.Enum;
@@ -115,7 +130,13 @@ internal static class BuiltInEditors
         // what the user can actually explore is whatever is in there right now.
         Type inspected = runtimeType ?? underlying;
 
-        if (!inspected.IsPrimitive && inspected != typeof(object) && HasPropertiesWorthShowing(inspected))
+        // A simple type is never "complex", however many properties it happens to have. A string
+        // has Length and Chars, so without this an object-typed property holding text was offered a
+        // read-only summary instead of a text box.
+        if (!inspected.IsPrimitive
+            && inspected != typeof(object)
+            && !KnownTypes.IsSimple(inspected)
+            && HasPropertiesWorthShowing(inspected))
         {
             return PropertyEditorKeys.Complex;
         }
@@ -127,6 +148,8 @@ internal static class BuiltInEditors
 
         return PropertyEditorKeys.ReadOnly;
     }
+
+    private static bool IsVague(Type type) => type == typeof(object) || type.IsInterface || type.IsAbstract;
 
     private static string TextKeyFor(PropertyDescription description)
     {

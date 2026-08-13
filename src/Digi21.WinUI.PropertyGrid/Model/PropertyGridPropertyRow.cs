@@ -224,14 +224,30 @@ public sealed class PropertyGridPropertyRow : PropertyGridRow
     /// <summary>Gets the flags to tick when the property is a <see cref="FlagsAttribute"/> enumeration, or an empty list.</summary>
     public IReadOnlyList<FlagMemberRow> FlagMembers { get; private set; } = [];
 
-    /// <summary>Gets the values a type converter says the property accepts, or an empty list.</summary>
-    public IReadOnlyList<object?> StandardValues { get; private set; } = [];
+    /// <summary>Gets the values the property accepts, each with its label, or an empty list.</summary>
+    /// <remarks>
+    /// Taken from <see cref="PropertyDescription.StandardValues"/> when the description named them,
+    /// and from the type's converter otherwise.
+    /// </remarks>
+    public IReadOnlyList<PropertyStandardValue> StandardValues { get; private set; } = [];
 
-    /// <summary>Gets or sets the chosen value when the property accepts a fixed set of them.</summary>
-    public object? SelectedStandardValue
+    /// <summary>Gets or sets the chosen entry when the property accepts a fixed set of values.</summary>
+    public PropertyStandardValue? SelectedStandardValue
     {
-        get => value;
-        set => TryWrite(value);
+        get
+        {
+            foreach (PropertyStandardValue standard in StandardValues)
+            {
+                if (Equals(standard.Value, value))
+                {
+                    return standard;
+                }
+            }
+
+            return null;
+        }
+
+        set => TryWrite(value?.Value);
     }
 
     /// <summary>Gets a value indicating whether the value differs from the one the property declares as its default.</summary>
@@ -457,7 +473,9 @@ public sealed class PropertyGridPropertyRow : PropertyGridRow
     {
         Type underlying = KnownTypes.Unwrap(PropertyType);
 
-        if (!underlying.IsEnum)
+        // Values named by the description come first even for an enumeration: naming them is an
+        // explicit statement, and an enum is only the default answer to the same question.
+        if (!underlying.IsEnum || Description.StandardValues is { Count: > 0 })
         {
             RefreshStandardValues(underlying);
             return;
@@ -505,16 +523,25 @@ public sealed class PropertyGridPropertyRow : PropertyGridRow
             return;
         }
 
+        // What the description says wins. It knows things the type cannot: two coded fields of the
+        // same table are both int and accept entirely different sets.
+        if (Description.StandardValues is { Count: > 0 } declared)
+        {
+            StandardValues = declared;
+            return;
+        }
+
         System.ComponentModel.TypeConverter converter = System.ComponentModel.TypeDescriptor.GetConverter(underlying);
         if (!converter.GetStandardValuesSupported())
         {
             return;
         }
 
-        List<object?> values = [];
+        List<PropertyStandardValue> values = [];
         foreach (object? standard in converter.GetStandardValues() ?? Array.Empty<object?>())
         {
-            values.Add(standard);
+            // A converter offers values and no labels, so the value has to speak for itself.
+            values.Add(new PropertyStandardValue(standard, PropertyValueConverter.ToText(standard, Source.Culture)));
         }
 
         StandardValues = values;

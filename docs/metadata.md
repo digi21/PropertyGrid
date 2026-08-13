@@ -150,6 +150,35 @@ internal sealed class SchemaProvider(Schema schema) : IPropertyDescriptionProvid
 behind a `PropertyInfo`. The grid does everything else — categories, sorting, editors, validation,
 change notification — the same way it does for a plain object.
 
+The grid asks the provider again on every rebuild and caches nothing by type, so swapping the
+provider and the object together always shows the new panel, even when both objects are the same
+type — as they are when the values live in a dictionary.
+
+### Values only this property accepts
+
+A description can name the values a property takes, and what to call each on screen:
+
+```csharp
+new PropertyDescription
+{
+    Name = "SignType",
+    PropertyType = typeof(int),
+    Accessor = accessor,
+    StandardValues =
+    [
+        new PropertyStandardValue(1, "Stop"),
+        new PropertyStandardValue(2, "No entry"),
+    ],
+}
+```
+
+That is enough: the row gets a drop-down with no template to write, shows the labels, and writes
+the codes. Per property rather than per type, which is the difference that matters — a
+`TypeConverter` can only speak for every `int` in the program, while two coded fields of the same
+table have different domains and both are read at run time.
+
+Leave `StandardValues` unset and the grid asks the type's converter exactly as before.
+
 `ICustomTypeDescriptor` and `TypeDescriptionProviderAttribute` are deliberately not supported: this
 covers the same ground with a much smaller surface.
 

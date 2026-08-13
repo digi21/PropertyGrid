@@ -29,7 +29,7 @@ internal static class PropertyValueConverter
             // A list describes itself as System.Collections.Generic.List`1[System.String], which
             // tells the reader nothing they wanted to know. How many there are does.
             case System.Collections.ICollection collection:
-                return Strings.CollectionSummary(collection.Count);
+                return PropertyGridStrings.CollectionSummary(collection.Count);
         }
 
         string? described = value.ToString();
@@ -61,7 +61,7 @@ internal static class PropertyValueConverter
         if (string.IsNullOrWhiteSpace(text))
         {
             value = null;
-            error = acceptsNull ? null : Strings.RequiredValue(underlying);
+            error = acceptsNull ? null : PropertyGridStrings.RequiredValue(underlying);
             return acceptsNull;
         }
 
@@ -71,7 +71,7 @@ internal static class PropertyValueConverter
         {
             bool parsed = Enum.TryParse(underlying, trimmed, ignoreCase: true, out object? member);
             value = parsed ? member : null;
-            error = parsed ? null : Strings.NotAValid(trimmed, underlying);
+            error = parsed ? null : PropertyGridStrings.NotAValid(trimmed, underlying);
             return parsed;
         }
 
@@ -88,7 +88,7 @@ internal static class PropertyValueConverter
         }
 
         value = null;
-        error = Strings.NotAValid(trimmed, underlying);
+        error = PropertyGridStrings.NotAValid(trimmed, underlying);
         return false;
     }
 
@@ -107,7 +107,7 @@ internal static class PropertyValueConverter
         {
             coerced = null;
             bool acceptsNull = underlying != targetType || !targetType.IsValueType;
-            error = acceptsNull ? null : Strings.RequiredValue(underlying);
+            error = acceptsNull ? null : PropertyGridStrings.RequiredValue(underlying);
             return acceptsNull;
         }
 
@@ -136,7 +136,7 @@ internal static class PropertyValueConverter
             catch (Exception exception) when (exception is ArgumentException or InvalidCastException or OverflowException)
             {
                 coerced = null;
-                error = Strings.CannotConvert(value.GetType(), underlying);
+                error = PropertyGridStrings.CannotConvert(value.GetType(), underlying);
                 return false;
             }
         }
@@ -152,13 +152,13 @@ internal static class PropertyValueConverter
             catch (Exception exception) when (exception is FormatException or InvalidCastException or OverflowException)
             {
                 coerced = null;
-                error = Strings.CannotConvert(value.GetType(), underlying);
+                error = PropertyGridStrings.CannotConvert(value.GetType(), underlying);
                 return false;
             }
         }
 
         coerced = null;
-        error = Strings.CannotConvert(value.GetType(), underlying);
+        error = PropertyGridStrings.CannotConvert(value.GetType(), underlying);
         return false;
     }
 

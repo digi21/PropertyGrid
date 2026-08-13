@@ -54,6 +54,27 @@ API can still change. Builds before the tag are published as `0.1.0-dev.N`.
 - `PropertyGridPropertyRow.AllowsEditing`, which asks whether an editor should offer to change a
   value at all, as distinct from `IsEditable`, which asks whether the property can be assigned. A
   list declared with only a getter is not assignable and is still meant to be edited.
+- `PropertyDescription.StandardValues`: the values one particular property accepts, each with the
+  label to show for it. Per property rather than per type, and read at run time, which is what a
+  `TypeConverter` cannot do — two coded fields of the same table are both `int` and accept
+  different sets. Declaring them is enough to get the drop-down; unset, the type's converter is
+  asked exactly as before.
+- `PropertyGrid.Culture` and `PropertyGrid.DefaultCategoryName`, for an application that chooses
+  its own language instead of following Windows.
+- Every word the templates show is now a resource key — `PropertyGridSearchPlaceholderText`,
+  `PropertyGridBrowseToolTipText`, `PropertyGridEditToolTipText`, `PropertyGridOkButtonText`,
+  `PropertyGridCancelButtonText` — and the sentences built at run time live on the public
+  `PropertyGridStrings`. Nothing user-visible is hard-coded in a template any more.
+
+### Fixed
+
+- A row could not grow with its editor. The row style set `Height` rather than `MinHeight`, so an
+  editor taller than a line was clipped, and there was no way to undo it from outside: a `Setter`
+  for a double does not parse `Auto`. Rows now grow, and the default row height moves from 28 to 32
+  so that a text box, a number box and a check box all measure the same.
+- A property declared as `object` and holding a string was given the read-only complex editor,
+  because a string has properties of its own. A property declared vaguely now resolves its editor
+  from the type of the value it holds.
 - `PropertyEditorTemplateMap`, registering an editor for a type, an interface and its
   implementations, or a name a property asks for.
 - Replacing a whole category of editors by redeclaring a `DataTemplate` under a

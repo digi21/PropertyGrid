@@ -158,6 +158,7 @@
             HorizontalAlignment="Stretch"
             VerticalAlignment="Center"
             BorderThickness="0"
+            DisplayMemberPath="DisplayName"
             IsEnabled="{Binding IsEditable}"
             ItemsSource="{Binding StandardValues}"
             SelectedItem="{Binding SelectedStandardValue, Mode=TwoWay}" />

@@ -121,7 +121,7 @@
                             <AutoSuggestBox
                                 x:Name="PART_SearchBox"
                                 Margin="6"
-                                PlaceholderText="Search properties"
+                                PlaceholderText="{ThemeResource PropertyGridSearchPlaceholderText}"
                                 QueryIcon="Find"
                                 Visibility="Collapsed" />
 
@@ -418,10 +418,10 @@
                             Margin="2,0,0,0"
                             Padding="0"
                             VerticalAlignment="Stretch"
-                            AutomationProperties.Name="Edit"
+                            AutomationProperties.Name="{ThemeResource PropertyGridEditToolTipText}"
                             Background="Transparent"
                             BorderThickness="0"
-                            ToolTipService.ToolTip="Edit…"
+                            ToolTipService.ToolTip="{ThemeResource PropertyGridEditToolTipText}"
                             Visibility="Collapsed">
                             <FontIcon
                                 FontFamily="{ThemeResource PropertyGridIconFontFamily}"
@@ -468,10 +468,10 @@
                             Margin="2,0,0,0"
                             Padding="0"
                             VerticalAlignment="Stretch"
-                            AutomationProperties.Name="Browse"
+                            AutomationProperties.Name="{ThemeResource PropertyGridBrowseToolTipText}"
                             Background="Transparent"
                             BorderThickness="0"
-                            ToolTipService.ToolTip="Browse…">
+                            ToolTipService.ToolTip="{ThemeResource PropertyGridBrowseToolTipText}">
                             <FontIcon
                                 FontFamily="{ThemeResource PropertyGridIconFontFamily}"
                                 FontSize="{ThemeResource PropertyGridIconFontSize}"
@@ -531,9 +531,9 @@
                                             Spacing="8">
                                             <Button
                                                 x:Name="PART_Confirm"
-                                                Content="OK"
+                                                Content="{ThemeResource PropertyGridOkButtonText}"
                                                 Style="{ThemeResource AccentButtonStyle}" />
-                                            <Button x:Name="PART_Cancel" Content="Cancel" />
+                                            <Button x:Name="PART_Cancel" Content="{ThemeResource PropertyGridCancelButtonText}" />
                                         </StackPanel>
                                     </StackPanel>
                                 </Flyout>

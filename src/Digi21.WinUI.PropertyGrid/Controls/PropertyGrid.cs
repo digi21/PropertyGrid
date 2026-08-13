@@ -155,6 +155,20 @@ public partial class PropertyGrid : Control
         typeof(PropertyGrid),
         new PropertyMetadata(null, (d, e) => ((PropertyGrid)d).OnDescriptionProviderChanged(e.NewValue as IPropertyDescriptionProvider)));
 
+    /// <summary>Identifies the <see cref="Culture"/> dependency property.</summary>
+    public static readonly DependencyProperty CultureProperty = DependencyProperty.Register(
+        nameof(Culture),
+        typeof(CultureInfo),
+        typeof(PropertyGrid),
+        new PropertyMetadata(null, (d, e) => ((PropertyGrid)d).source.Culture = e.NewValue as CultureInfo ?? CultureInfo.CurrentCulture));
+
+    /// <summary>Identifies the <see cref="DefaultCategoryName"/> dependency property.</summary>
+    public static readonly DependencyProperty DefaultCategoryNameProperty = DependencyProperty.Register(
+        nameof(DefaultCategoryName),
+        typeof(string),
+        typeof(PropertyGrid),
+        new PropertyMetadata(null, (d, e) => ((PropertyGrid)d).source.DefaultCategoryName = e.NewValue as string ?? PropertyGridStrings.DefaultCategoryName));
+
     /// <summary>Identifies the <see cref="SelectedRow"/> dependency property.</summary>
     public static readonly DependencyProperty SelectedRowProperty = DependencyProperty.Register(
         nameof(SelectedRow),
@@ -346,6 +360,26 @@ public partial class PropertyGrid : Control
     {
         get => (IPropertyDescriptionProvider?)GetValue(DescriptionProviderProperty);
         set => SetValue(DescriptionProviderProperty, value);
+    }
+
+    /// <summary>Gets or sets the culture values are shown and parsed in.</summary>
+    /// <remarks>
+    /// Defaults to the culture of the thread. An application that chooses its own language rather
+    /// than following Windows has to say so here as well, or the grid formats dates and decimal
+    /// separators differently from everything around it.
+    /// </remarks>
+    public CultureInfo? Culture
+    {
+        get => (CultureInfo?)GetValue(CultureProperty);
+        set => SetValue(CultureProperty, value);
+    }
+
+    /// <summary>Gets or sets the category properties land in when they do not name one.</summary>
+    /// <remarks>Shown to the user, so it needs translating along with everything else.</remarks>
+    public string? DefaultCategoryName
+    {
+        get => (string?)GetValue(DefaultCategoryNameProperty);
+        set => SetValue(DefaultCategoryNameProperty, value);
     }
 
     /// <summary>Gets or sets the row the description pane is explaining.</summary>

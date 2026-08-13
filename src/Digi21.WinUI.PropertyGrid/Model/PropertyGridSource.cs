@@ -24,7 +24,7 @@ public sealed class PropertyGridSource : ITargetObserver
     private PropertySort sort = PropertySort.CategorizedAlphabetical;
     private PropertyExpansionPolicy expansionPolicy = PropertyExpansionPolicy.Attributed;
     private CultureInfo culture = CultureInfo.CurrentCulture;
-    private string defaultCategoryName = Strings.DefaultCategoryName;
+    private string defaultCategoryName = PropertyGridStrings.DefaultCategoryName;
     private object? target;
     private Type? targetType;
     private string? filterText;
@@ -78,7 +78,7 @@ public sealed class PropertyGridSource : ITargetObserver
     public string DefaultCategoryName
     {
         get => defaultCategoryName;
-        set => Reconfigure(ref defaultCategoryName, string.IsNullOrWhiteSpace(value) ? Strings.DefaultCategoryName : value, rebuild: true);
+        set => Reconfigure(ref defaultCategoryName, string.IsNullOrWhiteSpace(value) ? PropertyGridStrings.DefaultCategoryName : value, rebuild: true);
     }
 
     /// <summary>Gets or sets a value indicating whether every row refuses to be edited.</summary>

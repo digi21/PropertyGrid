@@ -128,6 +128,18 @@
     <Thickness x:Key="PropertyGridBorderThickness">1</Thickness>
     <CornerRadius x:Key="PropertyGridCornerRadius">4</CornerRadius>
 
+    <!--
+        Every word the templates put on screen. Redeclare these in App.xaml the same way you would
+        redeclare a brush, and the grid speaks your language. The sentences the grid builds at run
+        time - the reasons an edit was rejected - live on PropertyGridStrings instead, because a
+        validation message has no control to ask.
+    -->
+    <x:String x:Key="PropertyGridSearchPlaceholderText">Search properties</x:String>
+    <x:String x:Key="PropertyGridBrowseToolTipText">Browse…</x:String>
+    <x:String x:Key="PropertyGridEditToolTipText">Edit…</x:String>
+    <x:String x:Key="PropertyGridOkButtonText">OK</x:String>
+    <x:String x:Key="PropertyGridCancelButtonText">Cancel</x:String>
+
     <!-- Glyphs, from the symbol font so they follow the shell rather than shipping as assets. -->
     <FontFamily x:Key="PropertyGridIconFontFamily">Segoe Fluent Icons,Segoe MDL2 Assets</FontFamily>
     <x:Double x:Key="PropertyGridIconFontSize">10</x:Double>

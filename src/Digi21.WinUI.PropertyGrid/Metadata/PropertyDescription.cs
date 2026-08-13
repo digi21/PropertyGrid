@@ -83,6 +83,21 @@ public sealed record PropertyDescription
     /// <summary>Gets the attributes declared on the property, for validation and for editors to read.</summary>
     public IReadOnlyList<Attribute> Attributes { get; init; } = [];
 
+    /// <summary>Gets the values this particular property accepts, or <see langword="null"/> to ask its type.</summary>
+    /// <remarks>
+    /// <para>
+    /// Per property, not per type, which is the difference that matters. A
+    /// <see cref="System.ComponentModel.TypeConverter"/>
+    /// can only say what every <c>int</c> in the program accepts; two coded fields of the same
+    /// database table have different domains, and both are read at run time.
+    /// </para>
+    /// <para>
+    /// Left <see langword="null"/>, the grid falls back to
+    /// <see cref="System.ComponentModel.TypeConverter.GetStandardValues()"/> exactly as before.
+    /// </para>
+    /// </remarks>
+    public IReadOnlyList<PropertyStandardValue>? StandardValues { get; init; }
+
     /// <summary>Finds the first attribute of a type declared on the property.</summary>
     /// <typeparam name="T">The type of attribute to look for.</typeparam>
     /// <returns>The attribute, or <see langword="null"/> if the property does not carry one.</returns>

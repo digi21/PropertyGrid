@@ -195,6 +195,16 @@ public sealed class PropertyGridPropertyRow : PropertyGridRow
     /// <summary>Gets the flags to tick when the property is a <see cref="FlagsAttribute"/> enumeration, or an empty list.</summary>
     public IReadOnlyList<FlagMemberRow> FlagMembers { get; private set; } = [];
 
+    /// <summary>Gets the values a type converter says the property accepts, or an empty list.</summary>
+    public IReadOnlyList<object?> StandardValues { get; private set; } = [];
+
+    /// <summary>Gets or sets the chosen value when the property accepts a fixed set of them.</summary>
+    public object? SelectedStandardValue
+    {
+        get => value;
+        set => TryWrite(value);
+    }
+
     /// <summary>Gets a value indicating whether the value differs from the one the property declares as its default.</summary>
     public bool IsModified => Description.HasDefaultValue && !Equals(value, Description.DefaultValue);
 
@@ -417,8 +427,10 @@ public sealed class PropertyGridPropertyRow : PropertyGridRow
     private void RefreshChoices()
     {
         Type underlying = KnownTypes.Unwrap(PropertyType);
+
         if (!underlying.IsEnum)
         {
+            RefreshStandardValues(underlying);
             return;
         }
 
@@ -455,6 +467,28 @@ public sealed class PropertyGridPropertyRow : PropertyGridRow
                 flag.SetCheckedQuietly((current & flag.Bits) == flag.Bits);
             }
         }
+    }
+
+    private void RefreshStandardValues(Type underlying)
+    {
+        if (StandardValues.Count > 0)
+        {
+            return;
+        }
+
+        System.ComponentModel.TypeConverter converter = System.ComponentModel.TypeDescriptor.GetConverter(underlying);
+        if (!converter.GetStandardValuesSupported())
+        {
+            return;
+        }
+
+        List<object?> values = [];
+        foreach (object? standard in converter.GetStandardValues() ?? Array.Empty<object?>())
+        {
+            values.Add(standard);
+        }
+
+        StandardValues = values;
     }
 
     private void OnFlagToggled(object? sender, EventArgs arguments)
@@ -501,6 +535,7 @@ public sealed class PropertyGridPropertyRow : PropertyGridRow
         RaisePropertyChanged(nameof(DateValue));
         RaisePropertyChanged(nameof(TimeValue));
         RaisePropertyChanged(nameof(SelectedEnumMember));
+        RaisePropertyChanged(nameof(SelectedStandardValue));
         RaisePropertyChanged(nameof(IsModified));
         RaisePropertyChanged(nameof(CanResetValue));
         RaisePropertyChanged(nameof(Errors));

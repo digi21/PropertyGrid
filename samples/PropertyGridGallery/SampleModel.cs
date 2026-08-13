@@ -26,6 +26,9 @@ public class SampleModel : ObservableObject
     private double area = 1234.56;
     private Uri? source = new("https://example.com/parcels.gpkg");
     private DateTime updatedAt = new(2026, 8, 13, 9, 30, 0, DateTimeKind.Local);
+    private DateOnly surveyedOn = new(2026, 3, 1);
+    private TimeSpan refreshEvery = TimeSpan.FromMinutes(90);
+    private Windows.UI.Color fill = Microsoft.UI.Colors.CornflowerBlue;
     private string tag = string.Empty;
 
     [Category("Identity")]
@@ -138,6 +141,30 @@ public class SampleModel : ObservableObject
     {
         get => updatedAt;
         set => SetProperty(ref updatedAt, value);
+    }
+
+    [Category("Source")]
+    [Description("The day the ground truth was collected. A DateOnly, so it gets a calendar and no clock.")]
+    public DateOnly SurveyedOn
+    {
+        get => surveyedOn;
+        set => SetProperty(ref surveyedOn, value);
+    }
+
+    [Category("Source")]
+    [Description("How often the layer is refreshed. A duration, so it gets a text box: a clock cannot express more than a day.")]
+    public TimeSpan RefreshEvery
+    {
+        get => refreshEvery;
+        set => SetProperty(ref refreshEvery, value);
+    }
+
+    [Category("Appearance")]
+    [Description("The colour parcels are filled with.")]
+    public Windows.UI.Color Fill
+    {
+        get => fill;
+        set => SetProperty(ref fill, value);
     }
 
     [Category("Source")]

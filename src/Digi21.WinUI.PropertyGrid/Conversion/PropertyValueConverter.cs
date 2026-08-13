@@ -13,15 +13,27 @@ internal static class PropertyValueConverter
 {
     internal static string ToText(object? value, CultureInfo culture)
     {
-        return value switch
+        switch (value)
         {
-            null => string.Empty,
-            string text => text,
+            case null:
+                return string.Empty;
+
+            case string text:
+                return text;
+
             // A formattable value with no format string still has to be given the culture, or a
             // Spanish user sees "1.5" where they type "1,5" and the round trip stops working.
-            IFormattable formattable => formattable.ToString(null, culture),
-            _ => value.ToString() ?? string.Empty,
-        };
+            case IFormattable formattable:
+                return formattable.ToString(null, culture);
+        }
+
+        string? described = value.ToString();
+
+        // A type that never overrode ToString describes itself with its own full name, which in a
+        // value cell is noise. The short name in brackets says the same thing and admits it.
+        return described is null || string.Equals(described, value.GetType().FullName, StringComparison.Ordinal)
+            ? "(" + value.GetType().Name + ")"
+            : described;
     }
 
     internal static bool TryParse(

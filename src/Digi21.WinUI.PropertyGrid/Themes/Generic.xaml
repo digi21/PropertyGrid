@@ -17,6 +17,60 @@
     <Style BasedOn="{StaticResource DefaultPropertyGridCategoryHeaderStyle}" TargetType="primitives:PropertyGridCategoryHeader" />
     <Style BasedOn="{StaticResource DefaultPropertyGridSplitterStyle}" TargetType="primitives:PropertyGridSplitter" />
     <Style BasedOn="{StaticResource DefaultPropertyGridDescriptionPaneStyle}" TargetType="primitives:PropertyGridDescriptionPane" />
+    <Style BasedOn="{StaticResource DefaultPropertyGridColorEditorStyle}" TargetType="primitives:PropertyGridColorEditor" />
+
+    <!--
+        The expander in the name cell. A toggle button with its chrome taken away: the default one
+        fills itself with the accent colour when checked, which in a list of rows reads as a
+        selection rather than as "this is open".
+    -->
+    <Style x:Key="PropertyGridExpanderToggleStyle" TargetType="ToggleButton">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="MinWidth" Value="0" />
+        <Setter Property="MinHeight" Value="0" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Border
+                        x:Name="Root"
+                        Background="Transparent"
+                        CornerRadius="2">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal" />
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource SubtleFillColorSecondaryBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource SubtleFillColorTertiaryBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Checked" />
+                                <VisualState x:Name="CheckedPointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource SubtleFillColorSecondaryBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="CheckedPressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource SubtleFillColorTertiaryBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
     <!-- The two structural row templates the repeater chooses between. -->
     <DataTemplate x:Key="DefaultPropertyGridPropertyRowTemplate">
@@ -147,8 +201,16 @@
                                         <Setter Target="PART_Expander.Visibility" Value="Collapsed" />
                                     </VisualState.Setters>
                                 </VisualState>
-                                <VisualState x:Name="Collapsed" />
-                                <VisualState x:Name="Expanded" />
+                                <VisualState x:Name="Collapsed">
+                                    <VisualState.Setters>
+                                        <Setter Target="ExpanderGlyph.Glyph" Value="{ThemeResource PropertyGridCollapsedGlyph}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Expanded">
+                                    <VisualState.Setters>
+                                        <Setter Target="ExpanderGlyph.Glyph" Value="{ThemeResource PropertyGridExpandedGlyph}" />
+                                    </VisualState.Setters>
+                                </VisualState>
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
 
@@ -164,14 +226,9 @@
                                         x:Name="PART_Expander"
                                         Width="{ThemeResource PropertyGridExpanderSize}"
                                         Height="{ThemeResource PropertyGridExpanderSize}"
-                                        MinWidth="0"
-                                        MinHeight="0"
                                         Margin="0,0,4,0"
-                                        Padding="0"
                                         VerticalAlignment="Center"
-                                        Background="Transparent"
-                                        BorderThickness="0"
-                                        IsTabStop="False">
+                                        Style="{StaticResource PropertyGridExpanderToggleStyle}">
                                         <FontIcon
                                             x:Name="ExpanderGlyph"
                                             FontFamily="{ThemeResource PropertyGridIconFontFamily}"
@@ -309,6 +366,68 @@
                             VerticalAlignment="Stretch"
                             Fill="{ThemeResource PropertyGridSplitterBrush}" />
                     </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="DefaultPropertyGridColorEditorStyle" TargetType="primitives:PropertyGridColorEditor">
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="primitives:PropertyGridColorEditor">
+                    <!--
+                        The swatch is a direct child of the template root, not the button's content:
+                        an element nested inside another control's content is outside the namescope
+                        GetTemplateChild searches, so the control could never find it to paint it.
+                        The button sits on top, transparent, and only provides the border and the
+                        flyout.
+                    -->
+                    <Grid Width="40" Height="20">
+                        <!--
+                            A light backdrop under the swatch, so a colour with alpha reads as
+                            translucent rather than as a slightly different opaque colour.
+                        -->
+                        <Rectangle Fill="{ThemeResource ControlFillColorInputActiveBrush}" />
+
+                        <!-- Painted from code: see PropertyGridColorEditor.UpdateSwatch. -->
+                        <Rectangle x:Name="PART_Swatch" />
+
+                        <Button
+                            x:Name="PART_OpenButton"
+                            Padding="0"
+                            Background="Transparent"
+                            BorderBrush="{ThemeResource PropertyGridColorSwatchBorderBrush}"
+                            BorderThickness="1">
+                            <Button.Flyout>
+                                <Flyout Placement="Bottom">
+                                    <!--
+                                        A flyout builds its content lazily and in its own namescope,
+                                        so these are found by name off the flyout when it opens
+                                        rather than by GetTemplateChild.
+                                    -->
+                                    <StackPanel Spacing="8">
+                                        <ColorPicker
+                                            x:Name="PART_Picker"
+                                            IsAlphaEnabled="True"
+                                            IsMoreButtonVisible="True" />
+                                        <StackPanel
+                                            HorizontalAlignment="Right"
+                                            Orientation="Horizontal"
+                                            Spacing="8">
+                                            <Button
+                                                x:Name="PART_Confirm"
+                                                Content="OK"
+                                                Style="{ThemeResource AccentButtonStyle}" />
+                                            <Button x:Name="PART_Cancel" Content="Cancel" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Flyout>
+                            </Button.Flyout>
+                        </Button>
+                    </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

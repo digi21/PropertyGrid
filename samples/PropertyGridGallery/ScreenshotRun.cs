@@ -23,6 +23,7 @@ internal sealed class ScreenshotRun(string outputPath, ElementTheme theme)
             root.RequestedTheme = theme;
         }
 
+        window.AppWindow.Resize(new Windows.Graphics.SizeInt32(1180, 1180));
         window.Activate();
         CompositionTarget.Rendering += OnRendering;
     }

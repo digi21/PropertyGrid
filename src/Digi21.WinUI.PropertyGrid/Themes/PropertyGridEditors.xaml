@@ -109,6 +109,104 @@
             SelectedItem="{Binding SelectedEnumMember, Mode=TwoWay}" />
     </DataTemplate>
 
+    <!--
+        A drop-down of tick boxes, one per flag. No code behind it: ticking a box sets IsChecked on
+        the FlagMemberRow, and the row recomposes the value from whatever is ticked.
+    -->
+    <DataTemplate x:Key="PropertyGridFlagsEnumEditorTemplate">
+        <DropDownButton
+            HorizontalAlignment="Stretch"
+            HorizontalContentAlignment="Left"
+            VerticalAlignment="Center"
+            Background="Transparent"
+            BorderThickness="0"
+            Content="{Binding Text}"
+            IsEnabled="{Binding IsEditable}">
+            <DropDownButton.Flyout>
+                <Flyout Placement="Bottom">
+                    <ItemsControl ItemsSource="{Binding FlagMembers}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <CheckBox
+                                    Content="{Binding DisplayName}"
+                                    IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                    ToolTipService.ToolTip="{Binding Description}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Flyout>
+            </DropDownButton.Flyout>
+        </DropDownButton>
+    </DataTemplate>
+
+    <DataTemplate x:Key="PropertyGridStandardValuesEditorTemplate">
+        <ComboBox
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Center"
+            BorderThickness="0"
+            IsEnabled="{Binding IsEditable}"
+            ItemsSource="{Binding StandardValues}"
+            SelectedItem="{Binding SelectedStandardValue, Mode=TwoWay}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="PropertyGridDateTimeEditorTemplate">
+        <StackPanel Orientation="Horizontal" Spacing="4">
+            <CalendarDatePicker
+                VerticalAlignment="Center"
+                BorderThickness="0"
+                Date="{Binding DateValue, Mode=TwoWay}"
+                IsEnabled="{Binding IsEditable}" />
+            <TimePicker
+                VerticalAlignment="Center"
+                BorderThickness="0"
+                IsEnabled="{Binding IsEditable}"
+                SelectedTime="{Binding TimeValue, Mode=TwoWay}" />
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate x:Key="PropertyGridDateEditorTemplate">
+        <CalendarDatePicker
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Center"
+            BorderThickness="0"
+            Date="{Binding DateValue, Mode=TwoWay}"
+            IsEnabled="{Binding IsEditable}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="PropertyGridTimeEditorTemplate">
+        <TimePicker
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Center"
+            BorderThickness="0"
+            IsEnabled="{Binding IsEditable}"
+            SelectedTime="{Binding TimeValue, Mode=TwoWay}" />
+    </DataTemplate>
+
+    <!--
+        Deliberately a text box rather than a TimePicker: a picker is a clock, so it cannot express
+        anything longer than a day or shorter than zero, and durations routinely are both.
+    -->
+    <DataTemplate x:Key="PropertyGridTimeSpanEditorTemplate">
+        <TextBox
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Center"
+            primitives:TextEditorBehaviors.CommitOnEnter="True"
+            primitives:TextEditorBehaviors.SelectAllOnFocus="True"
+            BorderThickness="0"
+            IsReadOnly="{Binding IsReadOnly}"
+            Padding="{ThemeResource PropertyGridEditorPadding}"
+            PlaceholderText="d.hh:mm:ss"
+            Text="{Binding Text, Mode=TwoWay}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="PropertyGridColorEditorTemplate">
+        <primitives:PropertyGridColorEditor IsEnabled="{Binding IsEditable}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="PropertyGridBrushEditorTemplate">
+        <primitives:PropertyGridColorEditor IsEnabled="{Binding IsEditable}" />
+    </DataTemplate>
+
     <DataTemplate x:Key="PropertyGridStructEditorTemplate">
         <TextBox
             HorizontalAlignment="Stretch"

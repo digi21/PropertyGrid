@@ -237,6 +237,26 @@ public class ValueConversionTests
     }
 
     [Fact]
+    public void DescribesAnObjectThatNeverOverrodeToStringByItsShortName()
+    {
+        // The default ToString is the full type name, which in a value cell is noise nobody reads.
+        PropertyGridSource source = new() { ExpansionPolicy = PropertyExpansionPolicy.Attributed };
+        source.SetTarget(new NestedSubject());
+
+        Assert.Equal("(AddressSubject)", source.FindRow("Address")!.Text);
+    }
+
+    [Fact]
+    public void LeavesAMeaningfulToStringAlone()
+    {
+        (PropertyGridSource source, ConversionSubject subject) = NewGrid();
+        subject.Address = new Uri("https://example.com/");
+        source.Refresh();
+
+        Assert.Equal("https://example.com/", source.FindRow("Address")!.Text);
+    }
+
+    [Fact]
     public void ShowsNothingWithoutATarget()
     {
         PropertyGridSource source = new();

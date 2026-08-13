@@ -200,7 +200,16 @@ public sealed class PropertyGridPropertyRow : PropertyGridRow
             DateOnly date => new DateTimeOffset(date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Local)),
             _ => null,
         };
-        set => TryWrite(value is null ? null : FromDate(value.Value));
+        set
+        {
+            if (value is null && !AcceptsNull)
+            {
+                RejectEditorDefault();
+                return;
+            }
+
+            TryWrite(value is null ? null : FromDate(value.Value));
+        }
     }
 
     /// <summary>Gets or sets the time of day part of the value, for the clock editors.</summary>
@@ -214,7 +223,16 @@ public sealed class PropertyGridPropertyRow : PropertyGridRow
             DateTime moment => moment.TimeOfDay,
             _ => null,
         };
-        set => TryWrite(value is null ? null : FromTime(value.Value));
+        set
+        {
+            if (value is null && !AcceptsNull)
+            {
+                RejectEditorDefault();
+                return;
+            }
+
+            TryWrite(value is null ? null : FromTime(value.Value));
+        }
     }
 
     /// <summary>Gets the members to choose from when the property is an enumeration, or an empty list.</summary>

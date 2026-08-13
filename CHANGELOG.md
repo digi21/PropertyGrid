@@ -85,6 +85,11 @@ API can still change. Builds before the tag are published as `0.1.0-dev.N`.
   switching objects cleared the value on the one being left behind. A null now reaches the model
   only when nothing is a choice the list actually offered, and the control is told to read again so
   it does not sit there showing an empty state.
+- A date that was not set drew as a real one. Bound through a classic `{Binding}`, a null reaching
+  `CalendarDatePicker.Date` arrives as `default(DateTimeOffset)` and is clamped to the earliest date
+  the picker shows — a hundred years ago — so an empty column read as `1/1/1926`. The three date
+  editors are now one control that pushes and pulls the values itself, and an empty date shows the
+  placeholder.
 - A `bool` holding true was drawn as an indeterminate check box. Same cause seen from the other
   side: the box pushed null on creation, the write was refused because a `bool` cannot be cleared,
   and nothing then told the box to go and read the real value. The same guard now covers a number

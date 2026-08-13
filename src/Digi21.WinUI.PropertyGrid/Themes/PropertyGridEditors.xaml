@@ -164,41 +164,21 @@
             SelectedItem="{Binding SelectedStandardValue, Mode=TwoWay}" />
     </DataTemplate>
 
+    <!--
+        None of the three binds its picker. A null reaching CalendarDatePicker.Date through a classic
+        binding arrives as default(DateTimeOffset) and is clamped to a hundred years ago, so an empty
+        date drew as a real one. PropertyGridDateEditor pushes and pulls the values itself.
+    -->
     <DataTemplate x:Key="PropertyGridDateTimeEditorTemplate">
-        <StackPanel Orientation="Horizontal" Spacing="4">
-            <CalendarDatePicker
-                MinHeight="0"
-                VerticalAlignment="Center"
-                BorderThickness="0"
-                Date="{Binding DateValue, Mode=TwoWay}"
-                IsEnabled="{Binding IsEditable}" />
-            <TimePicker
-                MinHeight="0"
-                VerticalAlignment="Center"
-                BorderThickness="0"
-                IsEnabled="{Binding IsEditable}"
-                SelectedTime="{Binding TimeValue, Mode=TwoWay}" />
-        </StackPanel>
+        <primitives:PropertyGridDateEditor Mode="DateAndTime" />
     </DataTemplate>
 
     <DataTemplate x:Key="PropertyGridDateEditorTemplate">
-        <CalendarDatePicker
-            MinHeight="0"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Center"
-            BorderThickness="0"
-            Date="{Binding DateValue, Mode=TwoWay}"
-            IsEnabled="{Binding IsEditable}" />
+        <primitives:PropertyGridDateEditor Mode="Date" />
     </DataTemplate>
 
     <DataTemplate x:Key="PropertyGridTimeEditorTemplate">
-        <TimePicker
-            MinHeight="0"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Center"
-            BorderThickness="0"
-            IsEnabled="{Binding IsEditable}"
-            SelectedTime="{Binding TimeValue, Mode=TwoWay}" />
+        <primitives:PropertyGridDateEditor Mode="Time" />
     </DataTemplate>
 
     <!--

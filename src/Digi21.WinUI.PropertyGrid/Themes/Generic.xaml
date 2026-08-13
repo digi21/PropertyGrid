@@ -452,6 +452,32 @@
         </Setter>
     </Style>
 
+    <Style BasedOn="{StaticResource DefaultPropertyGridDateEditorStyle}" TargetType="primitives:PropertyGridDateEditor" />
+
+    <Style x:Key="DefaultPropertyGridDateEditorStyle" TargetType="primitives:PropertyGridDateEditor">
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="primitives:PropertyGridDateEditor">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <CalendarDatePicker
+                            x:Name="PART_Calendar"
+                            MinHeight="0"
+                            VerticalAlignment="Center"
+                            BorderThickness="0"
+                            PlaceholderText="{ThemeResource PropertyGridSelectDatePlaceholderText}" />
+                        <TimePicker
+                            x:Name="PART_Clock"
+                            MinHeight="0"
+                            VerticalAlignment="Center"
+                            BorderThickness="0" />
+                    </StackPanel>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="DefaultPropertyGridPathEditorStyle" TargetType="primitives:PropertyGridPathEditor">
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="IsTabStop" Value="False" />

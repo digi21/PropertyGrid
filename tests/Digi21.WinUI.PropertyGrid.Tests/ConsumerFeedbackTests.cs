@@ -290,6 +290,77 @@ public class ConsumerFeedbackTests
         }
     }
 
+    // ---- dates that are not set ----
+
+    [Fact]
+    public void LeavesAnEmptyDateEmpty()
+    {
+        // A DATE column nobody has filled in is the normal state of a freshly created file, and it
+        // has to read as empty rather than as some date.
+        PropertyGridSource source = new();
+        source.SetTarget(new Moments());
+
+        PropertyGridPropertyRow row = source.FindRow("Missing")!;
+
+        Assert.Null(row.Value);
+        Assert.Null(row.DateValue);
+        Assert.Null(row.TimeValue);
+    }
+
+    [Fact]
+    public void ClearsADateThatCanBeCleared()
+    {
+        Moments subject = new() { Missing = new DateTime(2026, 3, 1, 0, 0, 0, DateTimeKind.Local) };
+        PropertyGridSource source = new();
+        source.SetTarget(subject);
+
+        source.FindRow("Missing")!.DateValue = null;
+
+        Assert.Null(subject.Missing);
+    }
+
+    [Fact]
+    public void KeepsADateThatCannotBeClearedWhenAFreshPickerPushesNothing()
+    {
+        // A picker being realized pushes its own empty state before it has been told what to show,
+        // and a plain DateTime has nowhere to put it.
+        Moments subject = new();
+        PropertyGridSource source = new();
+        source.SetTarget(subject);
+        PropertyGridPropertyRow row = source.FindRow("Stamp")!;
+
+        List<string?> announced = [];
+        row.PropertyChanged += (_, arguments) => announced.Add(arguments.PropertyName);
+
+        row.DateValue = null;
+        row.TimeValue = null;
+
+        Assert.Equal(new DateTime(2026, 8, 13, 9, 30, 0, DateTimeKind.Local), subject.Stamp);
+        Assert.Contains(nameof(PropertyGridPropertyRow.DateValue), announced);
+        Assert.Contains(nameof(PropertyGridPropertyRow.TimeValue), announced);
+    }
+
+    [Fact]
+    public void KeepsTheTimeWhenOnlyTheDayIsPicked()
+    {
+        // The calendar picks a day and says nothing about the clock, so the time already on the
+        // value has to survive.
+        Moments subject = new();
+        PropertyGridSource source = new();
+        source.SetTarget(subject);
+
+        source.FindRow("Stamp")!.DateValue = new DateTimeOffset(new DateTime(2027, 1, 2, 0, 0, 0, DateTimeKind.Local));
+
+        Assert.Equal(new DateTime(2027, 1, 2, 9, 30, 0, DateTimeKind.Local), subject.Stamp);
+    }
+
+    private sealed class Moments
+    {
+        public DateTime? Missing { get; set; }
+
+        public DateTime Stamp { get; set; } = new(2026, 8, 13, 9, 30, 0, DateTimeKind.Local);
+    }
+
     // ---- what must not break ----
 
     [Fact]

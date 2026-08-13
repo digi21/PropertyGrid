@@ -26,6 +26,7 @@ public class SampleModel : ObservableObject
     private DateTime moment = new(2026, 8, 13, 9, 30, 0, DateTimeKind.Local);
     private DateOnly day = new(2026, 3, 1);
     private TimeOnly clock = new(9, 30);
+    private DateTime? missing;
     private TimeSpan every = TimeSpan.FromMinutes(90);
     private Windows.UI.Color fill = Microsoft.UI.Colors.CornflowerBlue;
     private Uri? address = new("https://example.com/parcels.gpkg");
@@ -174,6 +175,15 @@ public class SampleModel : ObservableObject
 
     [Category("Standard items")]
     [PropertyOrder(14)]
+    [Description("A nullable date that is empty, which is what a column nobody has filled in looks like.")]
+    public DateTime? Missing
+    {
+        get => missing;
+        set => SetProperty(ref missing, value);
+    }
+
+    [Category("Standard items")]
+    [PropertyOrder(15)]
     [Description("A duration, in a text box: a clock cannot express more than a day or less than zero.")]
     public TimeSpan Every
     {

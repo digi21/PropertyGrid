@@ -135,6 +135,7 @@
         validation message has no control to ask.
     -->
     <x:String x:Key="PropertyGridSearchPlaceholderText">Search properties</x:String>
+    <x:String x:Key="PropertyGridSelectDatePlaceholderText">Pick a date</x:String>
     <x:String x:Key="PropertyGridBrowseToolTipText">Browse…</x:String>
     <x:String x:Key="PropertyGridEditToolTipText">Edit…</x:String>
     <x:String x:Key="PropertyGridOkButtonText">OK</x:String>

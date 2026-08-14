@@ -76,12 +76,27 @@ it: N is commits, not builds, so it jumps.
 
 ## 6. The tag rule
 
-**Do not create or push a `v*` tag.** That is what triggers the release workflow and publishes to
-nuget.org, and nothing should be published until the consumer confirms the integration. There are no
-tags in this repository yet, on purpose.
+**Do not create or push a `v*` tag unless the user asks for a release in so many words.** That is
+what triggers the release workflow and publishes to nuget.org, which does not come back: a version
+can be unlisted, never deleted. An ordinary push is always safe; only the tag publishes.
 
-When the time comes it is `git tag v0.1.0 && git push origin v0.1.0`, and it needs the `NUGET_USER`
-secret set in the repository — the nuget.org profile name, not the email.
+The bar for pushing one is that **the consumer has confirmed the integration works** on the dev
+build. Say so and wait if they have not.
+
+Releasing is then `git tag v1.0.1 && git push origin v1.0.1` — bump from the highest existing tag,
+`git tag -l`. Before tagging, close the `[Unreleased]` heading in `CHANGELOG.md` as that version
+with today's date, and commit that first so the tag lands on it.
+
+The infrastructure is set up and has published once: a trusted publishing policy on nuget.org
+(owner `digi21`, repo `PropertyGrid`, workflow file `release.yml`, no environment) exchanges the
+job's OIDC token for a one-hour key, and the `NUGET_USER` secret holds the nuget.org profile name.
+Nothing to configure again. If the login step ever fails, it is the policy or that secret, and the
+fix is to delete the tag, correct it and retag.
+
+v1.0.0 went out on 2026-08-15. Watch the run with the public API — there is no `gh` on this machine:
+`https://api.github.com/repos/digi21/PropertyGrid/actions/runs?per_page=5`, then
+`https://api.nuget.org/v3-flatcontainer/digi21.winui.propertygrid/index.json` for indexing, which
+lags the green tick by several minutes.
 
 ## Reporting back
 

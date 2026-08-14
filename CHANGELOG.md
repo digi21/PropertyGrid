@@ -5,11 +5,14 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] — towards 0.1.0
+## [1.0.0] — 2026-08-15
 
-Everything below works and is covered by tests or by the gallery, but nothing has been through a
-real application yet, which is why the first version will be 0.1 rather than 1.0 and why the public
-API can still change. Builds before the tag are published as `0.1.0-dev.N`.
+The first release. Everything below is covered by tests or by the gallery, and — the part that had
+been missing, and the reason this was going to be 0.1 — it has now been integrated into a real
+application and works there. The public API is what that integration used, so it is the one being
+committed to: from here, anything that breaks it takes a 2.0.
+
+Development builds between releases are published as `<next version>-dev.N`, where N counts commits.
 
 ### Added
 

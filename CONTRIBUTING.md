@@ -116,7 +116,7 @@ missing XML documentation on public members. Beyond that:
 
 There is no version number written down anywhere. MinVer works it out from the git history at build
 time: a commit tagged `v1.2.3` builds as `1.2.3`, and an untagged one builds as a pre-release of the
-version being worked towards — `0.1.0-dev.7`, where the number is how many commits there have been
+version being worked towards — `1.0.1-dev.7`, where the number is how many commits there have been
 since the last tag.
 
 Two things follow from that. `dotnet pack` on any commit produces a version nobody has used before,
@@ -124,7 +124,7 @@ so a local feed can hold a run of them and a consumer picks up a new one without
 the NuGet cache. And releasing is one command:
 
 ```
-git tag v0.1.0 && git push origin v0.1.0
+git tag v1.0.1 && git push origin v1.0.1
 ```
 
 Pushing a `v*` tag is what triggers the release workflow, which builds, tests, packs and publishes

@@ -49,8 +49,8 @@ model while nobody was typing**. That last one has to be zero.
 
 ## 4. Update the record
 
-- `CHANGELOG.md`, under `[Unreleased] — towards 0.1.0`. Fixes go under `### Fixed` with what the
-  symptom was, not just what changed.
+- `CHANGELOG.md`, under `[Unreleased]` — add the heading if the last one is a released version.
+  Fixes go under `### Fixed` with what the symptom was, not just what changed.
 - `docs/winui.md` if a WinUI trap was involved. That file exists so nobody pays for the same one
   twice.
 - The relevant `docs/` page if public API changed.
@@ -67,9 +67,9 @@ dotnet pack src/Digi21.WinUI.PropertyGrid/Digi21.WinUI.PropertyGrid.csproj -c Re
 git push
 ```
 
-MinVer works the version out from the git history: with no tag it produces `0.1.0-dev.N`, where N
-counts commits. **Every pack therefore produces a version nobody has used**, which is the whole
-point — the consumer picks it up without anyone clearing the NuGet cache.
+MinVer works the version out from the git history: after `v1.0.0` it produces `1.0.1-dev.N`, where N
+counts commits since the tag. **Every pack therefore produces a version nobody has used**, which is
+the whole point — the consumer picks it up without anyone clearing the NuGet cache.
 
 Read the version back off the `Successfully created package` line and tell the user. Do not guess
 it: N is commits, not builds, so it jumps.

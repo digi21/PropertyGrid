@@ -24,15 +24,14 @@
     <MinVerTagPrefix>v</MinVerTagPrefix>
 
     <!--
-      Until there is a tag, every build is a pre-release of the version being worked towards:
-      0.1.0-dev.1, 0.1.0-dev.2, and so on, where the number is how many commits there have been.
-      Each one is a distinct version, so a local feed can hold several and a consumer picks a new
-      one up without anybody having to clear the NuGet cache.
+      A tagged commit builds as exactly that version; every build after it is a pre-release of the
+      next one - 1.0.1-dev.1, 1.0.1-dev.2, and so on, where the number is how many commits there
+      have been since the tag. Each one is a distinct version, so a local feed can hold several and
+      a consumer picks a new one up without anybody having to clear the NuGet cache.
 
-      Tagging v0.1.0 makes MinVer emit exactly 0.1.0, and the dev builds after it march towards
-      0.1.1 - or towards whatever the next tag says.
+      The minimum below only matters if the tags are ever lost; the tag is what decides.
     -->
-    <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
+    <MinVerMinimumMajorMinor>1.0</MinVerMinimumMajorMinor>
     <MinVerDefaultPreReleaseIdentifiers>dev</MinVerDefaultPreReleaseIdentifiers>
   </PropertyGroup>
 

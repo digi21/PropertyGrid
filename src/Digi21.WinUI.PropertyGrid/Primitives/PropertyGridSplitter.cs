@@ -3,20 +3,28 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Shapes;
+using Windows.Foundation;
 
 namespace Digi21.WinUI.PropertyGrid.Primitives;
 
-/// <summary>The draggable divider between the name and the value columns of a <see cref="PropertyGrid"/>.</summary>
+/// <summary>A draggable divider in a <see cref="PropertyGrid"/>: between the two columns, or above the description pane.</summary>
 /// <remarks>
-/// There is one of these in the whole grid, sitting over the scrolling area rather than inside it or
-/// inside a row. That way it never scrolls out of view, it draws as one unbroken line down the
-/// grid, and there is a single thing to give focus and an automation peer to.
+/// There is one of each in the whole grid, sitting over what it divides rather than inside it or
+/// inside a row. That way neither scrolls out of view, the vertical one draws as an unbroken line
+/// down the grid, and there is a single thing to give focus and an automation peer to.
 /// </remarks>
 public partial class PropertyGridSplitter : Control
 {
+    /// <summary>Identifies the <see cref="Orientation"/> dependency property.</summary>
+    public static readonly DependencyProperty OrientationProperty = DependencyProperty.Register(
+        nameof(Orientation),
+        typeof(Orientation),
+        typeof(PropertyGridSplitter),
+        new PropertyMetadata(Orientation.Vertical, (d, _) => ((PropertyGridSplitter)d).OnOrientationChanged()));
+
     private Pointer? capturedPointer;
     private double startPosition;
-    private double startWidth;
+    private double startValue;
 
     /// <summary>Initializes a new instance of the <see cref="PropertyGridSplitter"/> class.</summary>
     public PropertyGridSplitter()
@@ -24,12 +32,26 @@ public partial class PropertyGridSplitter : Control
         DefaultStyleKey = typeof(PropertyGridSplitter);
         DefaultStyleResourceUri = new Uri("ms-appx:///Digi21.WinUI.PropertyGrid/Themes/Generic.xaml");
         PropertyGridThemeResources.Ensure();
-        ProtectedCursor = InputSystemCursor.Create(InputSystemCursorShape.SizeWestEast);
+        UpdateCursor();
+    }
+
+    /// <summary>Gets or sets which way the divider is drawn, and therefore which way it drags.</summary>
+    /// <remarks>
+    /// <see cref="Microsoft.UI.Xaml.Controls.Orientation.Vertical"/>, the default, is the line between
+    /// the name and the value columns; <see cref="Microsoft.UI.Xaml.Controls.Orientation.Horizontal"/>
+    /// is the one above the description pane.
+    /// </remarks>
+    public Orientation Orientation
+    {
+        get => (Orientation)GetValue(OrientationProperty);
+        set => SetValue(OrientationProperty, value);
     }
 
     internal PropertyGrid? Owner { get; set; }
 
     private bool IsDragging => capturedPointer is not null;
+
+    private bool IsHorizontal => Orientation == Orientation.Horizontal;
 
     /// <inheritdoc />
     protected override void OnApplyTemplate()
@@ -69,8 +91,10 @@ public partial class PropertyGridSplitter : Control
         }
 
         capturedPointer = e.Pointer;
-        startPosition = e.GetCurrentPoint(owner).Position.X;
-        startWidth = owner.NameColumnWidth;
+
+        Point position = e.GetCurrentPoint(owner).Position;
+        startPosition = IsHorizontal ? position.Y : position.X;
+        startValue = IsHorizontal ? owner.DescriptionHeight : owner.NameColumnWidth;
 
         VisualStateManager.GoToState(this, "Pressed", true);
         e.Handled = true;
@@ -86,11 +110,20 @@ public partial class PropertyGridSplitter : Control
             return;
         }
 
-        double delta = e.GetCurrentPoint(owner).Position.X - startPosition;
+        Point position = e.GetCurrentPoint(owner).Position;
 
         // Rounded before it is written, so that a drag of a fraction of a pixel does not invalidate
         // the measure of every realized row for a change nobody can see.
-        owner.NameColumnWidth = Math.Round(startWidth + delta);
+        if (IsHorizontal)
+        {
+            // The pane hangs below the divider, so dragging up has to make it taller, not shorter.
+            owner.DescriptionHeight = Math.Round(startValue - (position.Y - startPosition));
+        }
+        else
+        {
+            owner.NameColumnWidth = Math.Round(startValue + (position.X - startPosition));
+        }
+
         e.Handled = true;
     }
 
@@ -98,7 +131,16 @@ public partial class PropertyGridSplitter : Control
     protected override void OnDoubleTapped(DoubleTappedRoutedEventArgs e)
     {
         base.OnDoubleTapped(e);
-        Owner?.AutoSizeNameColumn();
+
+        if (IsHorizontal)
+        {
+            Owner?.AutoSizeDescription();
+        }
+        else
+        {
+            Owner?.AutoSizeNameColumn();
+        }
+
         e.Handled = true;
     }
 
@@ -122,13 +164,41 @@ public partial class PropertyGridSplitter : Control
         VisualStateManager.GoToState(this, "Normal", true);
     }
 
+    private void OnOrientationChanged()
+    {
+        UpdateCursor();
+        UpdateGrip();
+    }
+
+    private void UpdateCursor() =>
+        ProtectedCursor = InputSystemCursor.Create(
+            IsHorizontal ? InputSystemCursorShape.SizeNorthSouth : InputSystemCursorShape.SizeWestEast);
+
     private void UpdateGrip()
     {
-        if (GetTemplateChild("PART_Grip") is Rectangle grip)
+        if (GetTemplateChild("PART_Grip") is not Rectangle grip)
         {
-            // The band is wide enough to grab; the line drawn inside it is a hairline. The template
-            // cannot express "one device-independent pixel from the resources", so it is set here.
-            grip.Width = PropertyGridThemeResources.Value("PropertyGridSplitterGripThickness", 1.0);
+            return;
+        }
+
+        // The band is wide enough to grab; the line drawn inside it is a hairline. The template can
+        // express neither "one device-independent pixel from the resources" nor which way the line
+        // runs, so both are settled here.
+        double thickness = PropertyGridThemeResources.Value("PropertyGridSplitterGripThickness", 1.0);
+
+        if (IsHorizontal)
+        {
+            grip.Width = double.NaN;
+            grip.Height = thickness;
+            grip.HorizontalAlignment = HorizontalAlignment.Stretch;
+            grip.VerticalAlignment = VerticalAlignment.Center;
+        }
+        else
+        {
+            grip.Width = thickness;
+            grip.Height = double.NaN;
+            grip.HorizontalAlignment = HorizontalAlignment.Center;
+            grip.VerticalAlignment = VerticalAlignment.Stretch;
         }
     }
 }

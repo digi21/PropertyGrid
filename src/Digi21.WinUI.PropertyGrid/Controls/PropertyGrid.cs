@@ -88,6 +88,34 @@ public partial class PropertyGrid : Control
         typeof(PropertyGrid),
         new PropertyMetadata(true, (d, _) => ((PropertyGrid)d).UpdatePaneVisibility()));
 
+    /// <summary>Identifies the <see cref="DescriptionHeight"/> dependency property.</summary>
+    public static readonly DependencyProperty DescriptionHeightProperty = DependencyProperty.Register(
+        nameof(DescriptionHeight),
+        typeof(double),
+        typeof(PropertyGrid),
+        new PropertyMetadata(64.0, (d, e) => ((PropertyGrid)d).OnDescriptionHeightChanged((double)e.NewValue)));
+
+    /// <summary>Identifies the <see cref="MinimumDescriptionHeight"/> dependency property.</summary>
+    public static readonly DependencyProperty MinimumDescriptionHeightProperty = DependencyProperty.Register(
+        nameof(MinimumDescriptionHeight),
+        typeof(double),
+        typeof(PropertyGrid),
+        new PropertyMetadata(32.0, (d, _) => ((PropertyGrid)d).ClampDescriptionHeight()));
+
+    /// <summary>Identifies the <see cref="MinimumRowsHeight"/> dependency property.</summary>
+    public static readonly DependencyProperty MinimumRowsHeightProperty = DependencyProperty.Register(
+        nameof(MinimumRowsHeight),
+        typeof(double),
+        typeof(PropertyGrid),
+        new PropertyMetadata(64.0, (d, _) => ((PropertyGrid)d).ClampDescriptionHeight()));
+
+    /// <summary>Identifies the <see cref="CanResizeDescription"/> dependency property.</summary>
+    public static readonly DependencyProperty CanResizeDescriptionProperty = DependencyProperty.Register(
+        nameof(CanResizeDescription),
+        typeof(bool),
+        typeof(PropertyGrid),
+        new PropertyMetadata(true, (d, _) => ((PropertyGrid)d).UpdateDescriptionPane()));
+
     /// <summary>Identifies the <see cref="ShowSearchBox"/> dependency property.</summary>
     public static readonly DependencyProperty ShowSearchBoxProperty = DependencyProperty.Register(
         nameof(ShowSearchBox),
@@ -182,6 +210,7 @@ public partial class PropertyGrid : Control
     private ScrollViewer? scrollViewer;
     private ItemsRepeater? repeater;
     private PropertyGridSplitter? splitter;
+    private PropertyGridSplitter? descriptionSplitter;
     private PropertyGridDescriptionPane? descriptionPane;
     private AutoSuggestBox? searchBox;
 
@@ -199,7 +228,11 @@ public partial class PropertyGrid : Control
         source.ValueChanged = OnSourceValueChanged;
         source.DescriptionFilter = OnAutoGeneratingProperty;
 
-        SizeChanged += (_, _) => ClampNameColumnWidth();
+        SizeChanged += (_, _) =>
+        {
+            ClampNameColumnWidth();
+            ClampDescriptionHeight();
+        };
     }
 
     /// <summary>Raised for each property as the rows are built, to change or drop it.</summary>
@@ -297,6 +330,38 @@ public partial class PropertyGrid : Control
     {
         get => (bool)GetValue(ShowDescriptionProperty);
         set => SetValue(ShowDescriptionProperty, value);
+    }
+
+    /// <summary>Gets or sets the height of the description pane, which the user can drag.</summary>
+    /// <remarks>
+    /// An explanation too long for the height it is given scrolls inside the pane rather than being
+    /// cut off, so there is no height at which part of a sentence becomes unreachable.
+    /// </remarks>
+    public double DescriptionHeight
+    {
+        get => (double)GetValue(DescriptionHeightProperty);
+        set => SetValue(DescriptionHeightProperty, value);
+    }
+
+    /// <summary>Gets or sets how short the description pane can be dragged.</summary>
+    public double MinimumDescriptionHeight
+    {
+        get => (double)GetValue(MinimumDescriptionHeightProperty);
+        set => SetValue(MinimumDescriptionHeightProperty, value);
+    }
+
+    /// <summary>Gets or sets how short the list of rows can be squeezed by dragging the description pane taller.</summary>
+    public double MinimumRowsHeight
+    {
+        get => (double)GetValue(MinimumRowsHeightProperty);
+        set => SetValue(MinimumRowsHeightProperty, value);
+    }
+
+    /// <summary>Gets or sets a value indicating whether the divider above the description pane can be dragged.</summary>
+    public bool CanResizeDescription
+    {
+        get => (bool)GetValue(CanResizeDescriptionProperty);
+        set => SetValue(CanResizeDescriptionProperty, value);
     }
 
     /// <summary>Gets or sets a value indicating whether the grid shows its own search box.</summary>
@@ -459,6 +524,20 @@ public partial class PropertyGrid : Control
         }
     }
 
+    /// <summary>Grows or shrinks the description pane to fit the explanation it is showing.</summary>
+    /// <remarks>What double-clicking the divider above the pane does, and the counterpart of
+    /// <see cref="AutoSizeNameColumn"/>. A pane showing nothing keeps the height it has: there is
+    /// nothing to fit to, and collapsing to a sliver on an empty selection helps nobody.</remarks>
+    public void AutoSizeDescription()
+    {
+        if (descriptionPane?.NaturalHeight is not > 0)
+        {
+            return;
+        }
+
+        DescriptionHeight = Math.Ceiling(descriptionPane.NaturalHeight);
+    }
+
     /// <summary>Scrolls a row into view, realizing it first if the list had virtualized it away.</summary>
     /// <param name="row">The row to show.</param>
     public void ScrollIntoView(PropertyGridRow row)
@@ -545,6 +624,7 @@ public partial class PropertyGrid : Control
         scrollViewer = GetTemplateChild("PART_ScrollViewer") as ScrollViewer;
         repeater = GetTemplateChild("PART_ItemsRepeater") as ItemsRepeater;
         splitter = GetTemplateChild("PART_Splitter") as PropertyGridSplitter;
+        descriptionSplitter = GetTemplateChild("PART_DescriptionSplitter") as PropertyGridSplitter;
         descriptionPane = GetTemplateChild("PART_DescriptionPane") as PropertyGridDescriptionPane;
         searchBox = GetTemplateChild("PART_SearchBox") as AutoSuggestBox;
 
@@ -575,6 +655,11 @@ public partial class PropertyGrid : Control
             splitter.Owner = this;
         }
 
+        if (descriptionSplitter is not null)
+        {
+            descriptionSplitter.Owner = this;
+        }
+
         UpdateSplitter();
         UpdatePaneVisibility();
 
@@ -595,6 +680,34 @@ public partial class PropertyGrid : Control
         {
             searchBox.Visibility = ShowSearchBox ? Visibility.Visible : Visibility.Collapsed;
         }
+
+        UpdateDescriptionPane();
+    }
+
+    private void UpdateDescriptionPane()
+    {
+        if (descriptionPane is not null)
+        {
+            // A height rather than a MinHeight: once the divider is there the pane has to shrink as
+            // well as grow, and a MinHeight would quietly refuse the bottom half of the drag.
+            descriptionPane.Height = DescriptionHeight;
+        }
+
+        if (descriptionSplitter is null)
+        {
+            return;
+        }
+
+        descriptionSplitter.Visibility = ShowDescription && CanResizeDescription
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+
+        // Sized and placed from code for the same reason as the column splitter, and pulled up by
+        // half its thickness so the band to grab straddles the line the pane draws along its top
+        // edge instead of adding a second line just below it.
+        double thickness = PropertyGridThemeResources.Value("PropertyGridSplitterThickness", 6.0);
+        descriptionSplitter.Height = thickness;
+        descriptionSplitter.Margin = new Thickness(0, -thickness / 2, 0, 0);
     }
 
     private void OnSearchTextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs arguments)
@@ -713,6 +826,44 @@ public partial class PropertyGrid : Control
 
         double widest = Math.Max(MinimumNameColumnWidth, available - MinimumValueColumnWidth);
         return Math.Clamp(width, MinimumNameColumnWidth, widest);
+    }
+
+    private void OnDescriptionHeightChanged(double value)
+    {
+        double clamped = ClampDescription(value);
+        if (Math.Abs(clamped - value) > 0.5)
+        {
+            DescriptionHeight = clamped;
+            return;
+        }
+
+        UpdateDescriptionPane();
+    }
+
+    private void ClampDescriptionHeight()
+    {
+        double clamped = ClampDescription(DescriptionHeight);
+        if (Math.Abs(clamped - DescriptionHeight) > 0.5)
+        {
+            DescriptionHeight = clamped;
+        }
+        else
+        {
+            UpdateDescriptionPane();
+        }
+    }
+
+    private double ClampDescription(double height)
+    {
+        if (ActualHeight <= 0)
+        {
+            // Nothing has been measured yet, so there is no upper bound to clamp against; the
+            // SizeChanged handler comes back once there is.
+            return Math.Max(MinimumDescriptionHeight, height);
+        }
+
+        double tallest = Math.Max(MinimumDescriptionHeight, ActualHeight - MinimumRowsHeight);
+        return Math.Clamp(height, MinimumDescriptionHeight, tallest);
     }
 
     private void UpdateSplitter()

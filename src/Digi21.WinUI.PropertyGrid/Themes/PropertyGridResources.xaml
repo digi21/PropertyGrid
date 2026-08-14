@@ -123,6 +123,8 @@
     <x:Double x:Key="PropertyGridIndentSize">14</x:Double>
     <x:Double x:Key="PropertyGridExpanderSize">16</x:Double>
     <x:Double x:Key="PropertyGridDescriptionPaneHeight">64</x:Double>
+    <x:Double x:Key="PropertyGridMinimumDescriptionHeight">32</x:Double>
+    <x:Double x:Key="PropertyGridMinimumRowsHeight">64</x:Double>
     <Thickness x:Key="PropertyGridNamePadding">6,0,6,0</Thickness>
     <Thickness x:Key="PropertyGridEditorPadding">4,1,4,1</Thickness>
     <Thickness x:Key="PropertyGridBorderThickness">1</Thickness>

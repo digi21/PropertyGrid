@@ -21,7 +21,11 @@ API can still change. Builds before the tag are published as `0.1.0-dev.N`.
   nesting. Double-clicking it fits the column to the names on screen.
 - Categories that collapse, ordered by `PropertySort`: `NoSort`, `Alphabetical`, `Categorized` or
   `CategorizedAlphabetical`.
-- A description pane explaining the selected property, and showing why an edit was rejected.
+- A description pane explaining the selected property, and showing why an edit was rejected. The
+  divider above it drags with the mouse to make it taller or shorter, double-clicking that divider
+  fits it to the text, and an explanation too long for the height it has been given scrolls inside
+  it. `DescriptionHeight`, `MinimumDescriptionHeight`, `MinimumRowsHeight` and `CanResizeDescription`
+  set and bound it; `AutoSizeDescription()` is the double-click from code.
 - Filtering by `FilterText` or by a `Filter` predicate, with an optional built-in search box.
 - Keyboard navigation: arrows between rows, left and right to close and open, Home and End,
   F2 or Enter into the editor, Escape back out.

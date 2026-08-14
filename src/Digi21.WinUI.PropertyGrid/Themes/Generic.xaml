@@ -97,6 +97,9 @@
         <Setter Property="MinimumNameColumnWidth" Value="{ThemeResource PropertyGridMinimumNameColumnWidth}" />
         <Setter Property="MinimumValueColumnWidth" Value="{ThemeResource PropertyGridMinimumValueColumnWidth}" />
         <Setter Property="IndentSize" Value="{ThemeResource PropertyGridIndentSize}" />
+        <Setter Property="DescriptionHeight" Value="{ThemeResource PropertyGridDescriptionPaneHeight}" />
+        <Setter Property="MinimumDescriptionHeight" Value="{ThemeResource PropertyGridMinimumDescriptionHeight}" />
+        <Setter Property="MinimumRowsHeight" Value="{ThemeResource PropertyGridMinimumRowsHeight}" />
         <Setter Property="IsTabStop" Value="False" />
         <Setter Property="Template">
             <Setter.Value>
@@ -154,7 +157,19 @@
                                     VerticalAlignment="Stretch" />
                             </Grid>
 
+                            <!--
+                                The divider above the pane shares the pane's row and is declared
+                                after it, so it draws and takes its pointer input on top; a negative
+                                top margin, set from code, lifts the band it offers to grab over the
+                                join between the rows and the pane.
+                            -->
                             <primitives:PropertyGridDescriptionPane x:Name="PART_DescriptionPane" Grid.Row="2" />
+
+                            <primitives:PropertyGridSplitter
+                                x:Name="PART_DescriptionSplitter"
+                                Grid.Row="2"
+                                VerticalAlignment="Top"
+                                Orientation="Horizontal" />
                         </Grid>
                     </Border>
                 </ControlTemplate>
@@ -633,12 +648,17 @@
     </Style>
 
     <Style x:Key="DefaultPropertyGridDescriptionPaneStyle" TargetType="primitives:PropertyGridDescriptionPane">
-        <Setter Property="MinHeight" Value="{ThemeResource PropertyGridDescriptionPaneHeight}" />
+        <!--
+            The minimum, not the height: the grid writes the height the user has dragged the pane to,
+            and a MinHeight of the resting height would refuse the bottom half of that drag.
+        -->
+        <Setter Property="MinHeight" Value="{ThemeResource PropertyGridMinimumDescriptionHeight}" />
         <Setter Property="IsTabStop" Value="False" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="primitives:PropertyGridDescriptionPane">
                     <Border
+                        x:Name="PART_Root"
                         Padding="8,6,8,8"
                         Background="{ThemeResource PropertyGridDescriptionPaneBackgroundBrush}"
                         BorderBrush="{ThemeResource PropertyGridDescriptionPaneBorderBrush}"
@@ -654,18 +674,29 @@
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
 
-                        <StackPanel>
-                            <TextBlock
-                                x:Name="PART_Title"
-                                Foreground="{ThemeResource PropertyGridDescriptionTitleForegroundBrush}"
-                                Style="{ThemeResource PropertyGridCategoryTextStyle}"
-                                Text="{TemplateBinding Title}" />
-                            <TextBlock
-                                x:Name="PART_Text"
-                                Foreground="{ThemeResource PropertyGridDescriptionForegroundBrush}"
-                                Style="{ThemeResource PropertyGridDescriptionTextStyle}"
-                                Text="{TemplateBinding Text}" />
-                        </StackPanel>
+                        <!--
+                            The text scrolls inside the pane rather than spilling out of it: now that
+                            the pane can be dragged shorter than its explanation, a sentence that does
+                            not fit still has to be reachable.
+                        -->
+                        <ScrollViewer
+                            HorizontalScrollBarVisibility="Disabled"
+                            HorizontalScrollMode="Disabled"
+                            VerticalScrollBarVisibility="Auto"
+                            VerticalScrollMode="Auto">
+                            <StackPanel>
+                                <TextBlock
+                                    x:Name="PART_Title"
+                                    Foreground="{ThemeResource PropertyGridDescriptionTitleForegroundBrush}"
+                                    Style="{ThemeResource PropertyGridCategoryTextStyle}"
+                                    Text="{TemplateBinding Title}" />
+                                <TextBlock
+                                    x:Name="PART_Text"
+                                    Foreground="{ThemeResource PropertyGridDescriptionForegroundBrush}"
+                                    Style="{ThemeResource PropertyGridDescriptionTextStyle}"
+                                    Text="{TemplateBinding Text}" />
+                            </StackPanel>
+                        </ScrollViewer>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>

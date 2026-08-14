@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Windows.Foundation;
 
 namespace Digi21.WinUI.PropertyGrid.Primitives;
 
@@ -28,6 +29,7 @@ public partial class PropertyGridDescriptionPane : Control
         new PropertyMetadata(string.Empty));
 
     private PropertyGridPropertyRow? subscribed;
+    private FrameworkElement? root;
 
     /// <summary>Initializes a new instance of the <see cref="PropertyGridDescriptionPane"/> class.</summary>
     public PropertyGridDescriptionPane()
@@ -56,6 +58,32 @@ public partial class PropertyGridDescriptionPane : Control
     {
         get => (string)GetValue(TextProperty);
         private set => SetValue(TextProperty, value);
+    }
+
+    /// <summary>Gets the height the pane would need to show the whole explanation without scrolling.</summary>
+    /// <remarks>Zero until the pane has been measured once. This is what double-clicking the divider above it fits to.</remarks>
+    public double NaturalHeight { get; private set; }
+
+    /// <inheritdoc />
+    protected override void OnApplyTemplate()
+    {
+        base.OnApplyTemplate();
+        root = GetTemplateChild("PART_Root") as FrameworkElement;
+    }
+
+    /// <inheritdoc />
+    protected override Size MeasureOverride(Size availableSize)
+    {
+        if (root is not null)
+        {
+            // Measured once with no ceiling, to learn what the whole sentence would need, and then
+            // again by the base pass at the height the pane has actually been given - which is the
+            // measure the arrange pass goes on to use.
+            root.Measure(new Size(availableSize.Width, double.PositiveInfinity));
+            NaturalHeight = root.DesiredSize.Height;
+        }
+
+        return base.MeasureOverride(availableSize);
     }
 
     private void OnRowChanged()

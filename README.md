@@ -25,6 +25,8 @@ attributes already on your model, validated, and kept in step with the object as
   summary and a `…`, raises an event, and stays out of the way. The button only appears if you are
   listening.
 - **A resizable name column.** One splitter drags it in every row at once, at every level of nesting.
+- **A resizable description pane.** Drag the divider above it for more room, or double-click that
+  divider to fit it to the text. Anything longer scrolls inside it.
 - **Categories** that collapse, from `[Category]` or `[Display(GroupName)]`.
 - **The attributes you already have**: `[Browsable]`, `[Category]`, `[Description]`,
   `[DisplayName]`, `[ReadOnly]`, `[DefaultValue]`, and the DataAnnotations equivalents.
@@ -102,6 +104,11 @@ public class Layer : ObservableObject
 
 `PropertySort` is `NoSort`, `Alphabetical`, `Categorized` or `CategorizedAlphabetical`. `FilterText`
 narrows the list to what matches, and `Filter` takes a predicate for anything text cannot express.
+
+The description pane starts at `DescriptionHeight` and the user drags it from there, down to
+`MinimumDescriptionHeight` and up to whatever leaves `MinimumRowsHeight` for the rows.
+`CanResizeDescription="False"` takes the divider away for a grid that should keep the height you
+gave it.
 
 ### Nested objects
 

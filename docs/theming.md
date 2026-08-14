@@ -107,13 +107,16 @@ The same in every theme, so they go in the dictionary root rather than in a them
 | `PropertyGridIndentSize` | `Double` | 14 |
 | `PropertyGridExpanderSize` | `Double` | 16 |
 | `PropertyGridDescriptionPaneHeight` | `Double` | 64 |
+| `PropertyGridMinimumDescriptionHeight` | `Double` | 32 |
+| `PropertyGridMinimumRowsHeight` | `Double` | 64 |
 | `PropertyGridNamePadding` | `Thickness` | `6,0,6,0` |
 | `PropertyGridEditorPadding` | `Thickness` | `4,1,4,1` |
 | `PropertyGridBorderThickness` | `Thickness` | `1` |
 | `PropertyGridCornerRadius` | `CornerRadius` | `4` |
 
-The last four column metrics reach their properties through setters in `DefaultPropertyGridStyle`,
-so setting `NameColumnWidth` on a grid directly still wins over them.
+The column and description metrics reach their properties through setters in
+`DefaultPropertyGridStyle`, so setting `NameColumnWidth` or `DescriptionHeight` on a grid directly
+still wins over them — and so does the user, once either divider has been dragged.
 
 `PropertyGridSplitterThickness`, `PropertyGridSplitterGripThickness` and `PropertyGridIndentSize`
 are read from code as well as from templates — the layout cannot express them — so replacing them

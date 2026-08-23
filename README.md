@@ -11,7 +11,10 @@ A property grid for WinUI 3. Point it at an object and it lists the object's pro
 rows: an editor chosen from each property's type, grouped into categories, labelled from the
 attributes already on your model, validated, and kept in step with the object as it changes.
 
-<img src="https://raw.githubusercontent.com/digi21/PropertyGrid/main/assets/gallery.png" width="820" alt="The gallery, showing categories, editors and a nested object" />
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/digi21/PropertyGrid/main/assets/gallery-dark.png" />
+  <img src="https://raw.githubusercontent.com/digi21/PropertyGrid/main/assets/gallery.png" width="820" alt="The gallery, showing categories, editors and a nested object" />
+</picture>
 
 ## Features
 

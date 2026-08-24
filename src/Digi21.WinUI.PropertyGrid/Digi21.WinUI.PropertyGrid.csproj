@@ -25,13 +25,16 @@
 
     <!--
       A tagged commit builds as exactly that version; every build after it is a pre-release of the
-      next one - 1.0.1-dev.1, 1.0.1-dev.2, and so on, where the number is how many commits there
+      next one - 2.0.0-dev.1, 2.0.0-dev.2, and so on, where the number is how many commits there
       have been since the tag. Each one is a distinct version, so a local feed can hold several and
       a consumer picks a new one up without anybody having to clear the NuGet cache.
 
-      The minimum below only matters if the tags are ever lost; the tag is what decides.
+      The minimum is 2.0 rather than 1.0 because the release being built towards removes a public
+      type, and 1.0.0 committed to taking a major version for that. It is what makes the dev builds
+      say so: after v1.0.0 the calculated version would otherwise be 1.0.1-dev.N, which would tell a
+      consumer that nothing of theirs can have broken.
     -->
-    <MinVerMinimumMajorMinor>1.0</MinVerMinimumMajorMinor>
+    <MinVerMinimumMajorMinor>2.0</MinVerMinimumMajorMinor>
     <MinVerDefaultPreReleaseIdentifiers>dev</MinVerDefaultPreReleaseIdentifiers>
   </PropertyGroup>
 

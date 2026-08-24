@@ -130,6 +130,21 @@ is not a limitation to work around; it is the reason the entire model layer — 
 conversion, validation — is plain observable objects. A `DependencyObject`-based row model would
 mean no unit tests at all.
 
+### `Application.Current` does not answer null outside an application — it throws
+
+The documented answer is null when there is no application, and that is what happens in a XAML
+designer or once a WinUI runtime has been activated in the process. In a plain test host, where it
+never has been, the property is a WinRT activation like any other and asking for it throws
+`COMException 0x80040154` — the same `REGDB_E_CLASSNOTREG` that `new` on a `DependencyObject` gives.
+
+It stayed hidden here for as long as only control code read the application's resources, because
+control code cannot run in a test host anyway. Reading a resource key from the *model* layer — which
+is what made the grid's own sentences replaceable — put the call on a path 130 tests walk, and every
+one of them failed at once.
+
+> `PropertyGridThemeResources` catches it, treats it as "no application, use the built-in default",
+> and remembers the answer: the throw is expensive, and a sentence is built for every rejected edit.
+
 ## Not WinUI, but caught here anyway
 
 - **`[PasswordPropertyText]` with no argument means `false`.** It reads like an opt-in and is the

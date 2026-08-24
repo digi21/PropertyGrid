@@ -195,7 +195,8 @@ public partial class PropertyGrid : Control
         nameof(DefaultCategoryName),
         typeof(string),
         typeof(PropertyGrid),
-        new PropertyMetadata(null, (d, e) => ((PropertyGrid)d).source.DefaultCategoryName = e.NewValue as string ?? PropertyGridStrings.DefaultCategoryName));
+        // Clearing it asks for the default back, and an empty name is how the source is told so.
+        new PropertyMetadata(null, (d, e) => ((PropertyGrid)d).source.DefaultCategoryName = e.NewValue as string ?? string.Empty));
 
     /// <summary>Identifies the <see cref="SelectedRow"/> dependency property.</summary>
     public static readonly DependencyProperty SelectedRowProperty = DependencyProperty.Register(

@@ -5,6 +5,62 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **Breaking.** `PropertyGridStrings` is gone. Every string it held is now a resource key with the
+  same English behind it, declared in `Themes/PropertyGridResources.xaml` and replaced the way a
+  brush is: `PropertyGridDefaultCategoryName`, `PropertyGridNotAValidFormat`,
+  `PropertyGridRequiredValueFormat`, `PropertyGridCannotConvertFormat`,
+  `PropertyGridCollectionSummaryFormat` and the nine type names —
+  `PropertyGridWholeNumberName`, `PropertyGridNumberName`, `PropertyGridBooleanName`,
+  `PropertyGridCharacterName`, `PropertyGridTextName`, `PropertyGridDateTimeName`,
+  `PropertyGridDateName`, `PropertyGridTimeName`, `PropertyGridDurationName`.
+
+  There was no reason for two mechanisms. What a template shows was already a key; what the grid
+  built at run time was fourteen static properties, on the grounds that a validation message has no
+  control to ask — which does not hold, because a resource lookup does not need one. Being static
+  also made them process-wide rather than per application, so two windows, or a host and a plug-in
+  that both use this library, shared one set.
+
+  Replacing `PropertyGridStrings.X = "…"` with an `<x:String x:Key="PropertyGridX">…</x:String>` in
+  `App.xaml`, or an entry written into `Application.Current.Resources`, is the whole migration.
+  There is no shim: one that wrote into the resource dictionary would leave two ways to do it, which
+  is the thing being fixed.
+
+- `NameOf(Type)` moves to the new `PropertyGridText` and reads the keys. A `DateTime` is still a
+  "date and time" rather than a `DateTime`.
+
+- The keys are read where they are used rather than cached, so a translation declared after the
+  first grid already exists reaches every sentence built from then on; what rows already show
+  follows the next time they are built. An entry put straight into `Application.Current.Resources`
+  wins over the library's own default whichever of the two arrives first.
+
+### Added
+
+- `PropertyGridText.ResourceKeys`, every resource key the grid reads text from — the six a template
+  paints as well as the fourteen it builds. A key is not a name the compiler checks, and that is the
+  one respect in which this change is a step back: an entry filed under a key the library no longer
+  reads fails in silence, and the string reverts to English somewhere nobody looks. Walking this
+  list where an application declares its strings turns both that and an untranslated key into a
+  startup error. One read-only member replaces fourteen settable ones, and
+  [docs/theming.md](docs/theming.md#checking-a-translation-at-startup) has the twelve lines.
+
+- `PropertyGridSelectDatePlaceholderText` is documented; it shipped in 1.0.0 and was missing from
+  the list in `docs/theming.md`.
+
+### Fixed
+
+- Asking for `Application.Current` outside an application throws `COMException 0x80040154` rather
+  than answering null, and every read of a library resource key went through it unguarded. Nothing
+  had noticed, because until now only control code — which cannot run without a XAML runtime anyway
+  — read one. Reading a key from the model layer would have thrown on every rejected edit in a
+  console host or a test. It is caught, treated as "no application, use the built-in default", and
+  remembered.
+
+- `docs/theming.md` gave `PropertyGridRowHeight` as 28. It has been 32 since 1.0.0.
+
 ## [1.0.0] — 2026-08-15
 
 The first release. Everything below is covered by tests or by the gallery, and — the part that had

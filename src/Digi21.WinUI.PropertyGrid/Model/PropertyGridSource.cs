@@ -24,7 +24,7 @@ public sealed class PropertyGridSource : ITargetObserver
     private PropertySort sort = PropertySort.CategorizedAlphabetical;
     private PropertyExpansionPolicy expansionPolicy = PropertyExpansionPolicy.Attributed;
     private CultureInfo culture = CultureInfo.CurrentCulture;
-    private string defaultCategoryName = PropertyGridStrings.DefaultCategoryName;
+    private string? defaultCategoryName;
     private object? target;
     private Type? targetType;
     private string? filterText;
@@ -75,10 +75,15 @@ public sealed class PropertyGridSource : ITargetObserver
     }
 
     /// <summary>Gets or sets the category properties land in when they do not name one.</summary>
+    /// <remarks>
+    /// Setting it to nothing at all puts the grid back on <c>PropertyGridDefaultCategoryName</c>,
+    /// which is read whenever the categories are built rather than remembered here — an application
+    /// that declares its own is not racing the moment this object came into existence.
+    /// </remarks>
     public string DefaultCategoryName
     {
-        get => defaultCategoryName;
-        set => Reconfigure(ref defaultCategoryName, string.IsNullOrWhiteSpace(value) ? PropertyGridStrings.DefaultCategoryName : value, rebuild: true);
+        get => defaultCategoryName ?? PropertyGridText.DefaultCategoryName;
+        set => Reconfigure(ref defaultCategoryName, string.IsNullOrWhiteSpace(value) ? null : value, rebuild: true);
     }
 
     /// <summary>Gets or sets a value indicating whether every row refuses to be edited.</summary>
@@ -391,7 +396,7 @@ public sealed class PropertyGridSource : ITargetObserver
 
                 foreach (PropertyDescription description in Arrange(shown))
                 {
-                    string categoryName = PropertyDescriptionSorter.CategoryOf(description, defaultCategoryName);
+                    string categoryName = PropertyDescriptionSorter.CategoryOf(description, DefaultCategoryName);
                     if (!byName.TryGetValue(categoryName, out PropertyGridCategoryRow? category))
                     {
                         category = new PropertyGridCategoryRow(this, categoryName);
@@ -436,7 +441,7 @@ public sealed class PropertyGridSource : ITargetObserver
             discovered = kept;
         }
 
-        return PropertyDescriptionSorter.Sort(discovered, sort, defaultCategoryName);
+        return PropertyDescriptionSorter.Sort(discovered, sort, DefaultCategoryName);
     }
 
     private PropertyGridPropertyRow CreateRow(

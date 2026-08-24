@@ -9,6 +9,10 @@ internal static class PropertyDescriptionSorter
 {
     // The category a property lands in when it never said. Last in every categorized mode, because a
     // pile of unclassified properties above the ones somebody bothered to classify is backwards.
+    //
+    // Only a default for callers that do not care what it is called - the grid always passes its
+    // own, which comes from PropertyGridDefaultCategoryName. What sorts last is whichever name was
+    // passed, so this text is never the thing a user reads.
     internal const string DefaultCategoryName = "Misc";
 
     internal static string CategoryOf(PropertyDescription description, string defaultCategoryName) =>

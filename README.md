@@ -191,10 +191,23 @@ list, the metrics, and how to retemplate a control.
 
 ### Other languages
 
-Every word the grid shows is either a resource key you redeclare or a property on
-`PropertyGridStrings`. [docs/localisation.md](https://github.com/digi21/PropertyGrid/blob/main/docs/localisation.md)
-has the lot translated into Catalan, English, Basque, French, Galician, German, Italian, Portuguese
-and Spanish.
+Every word the grid says on its own account is a resource key, so a language is one
+`ResourceDictionary` and nothing to remember to call — the reasons an edit was rejected included:
+
+```xml
+<x:String x:Key="PropertyGridNotAValidFormat">«{0}» no es un {1} válido.</x:String>
+```
+
+`PropertyGridText.ResourceKeys` is every key the grid reads, so an application can check at startup
+that it has translated all of them and that none of its own entries is filed under a name the grid
+no longer reads — which would otherwise revert to English without saying so.
+
+The grid does not translate what you put in it: a property's name, its category and its description
+are yours, and reach the grid already in whatever language you chose.
+
+[docs/localisation.md](https://github.com/digi21/PropertyGrid/blob/main/docs/localisation.md) has
+the lot translated into Catalan, English, Basque, French, Galician, German, Italian, Portuguese and
+Spanish.
 
 ### Types you do not own
 

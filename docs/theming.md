@@ -97,7 +97,7 @@ The same in every theme, so they go in the dictionary root rather than in a them
 
 | Key | Type | Default |
 |---|---|---|
-| `PropertyGridRowHeight` | `Double` | 28 |
+| `PropertyGridRowHeight` | `Double` | 32 |
 | `PropertyGridCategoryHeaderHeight` | `Double` | 30 |
 | `PropertyGridNameColumnWidth` | `Double` | 160 |
 | `PropertyGridMinimumNameColumnWidth` | `Double` | 48 |
@@ -124,33 +124,98 @@ takes effect the next time a row is laid out.
 
 ## Words
 
-Everything the templates put on screen is a resource key, replaced the same way a brush is:
+Everything the grid says on its own account is a resource key, replaced the same way a brush is —
+whether a template paints it or the grid builds the sentence at run time:
+
+```xml
+<x:String x:Key="PropertyGridDefaultCategoryName">Varios</x:String>
+```
+
+These six are painted by a template:
 
 | Key | Defaults to |
 |---|---|
 | `PropertyGridSearchPlaceholderText` | `Search properties` |
+| `PropertyGridSelectDatePlaceholderText` | `Pick a date` |
 | `PropertyGridBrowseToolTipText` | `Browse…` |
 | `PropertyGridEditToolTipText` | `Edit…` |
 | `PropertyGridOkButtonText` | `OK` |
 | `PropertyGridCancelButtonText` | `Cancel` |
 
-The sentences the grid builds at run time — why an edit was rejected, how a list is summarised, the
-name of the catch-all category — are not in a template and cannot be resource keys. They live on
-`PropertyGridStrings`, which is public and settable:
+And these the grid builds at run time — the name of the catch-all category, how a list is summarised
+in its row, and the reasons an edit was rejected:
 
-```csharp
-PropertyGridStrings.DefaultCategoryName = Loc("Varios");
-PropertyGridStrings.NotAValidFormat = Loc("'{0}' no es un {1} válido.");
-PropertyGridStrings.WholeNumberName = Loc("número entero");
-```
+| Key | Defaults to | Takes |
+|---|---|---|
+| `PropertyGridDefaultCategoryName` | `Misc` | |
+| `PropertyGridNotAValidFormat` | `'{0}' is not a valid {1}.` | the text, then the type name |
+| `PropertyGridRequiredValueFormat` | `A {0} is required.` | the type name |
+| `PropertyGridCannotConvertFormat` | `A {0} cannot be used as a {1}.` | both type names |
+| `PropertyGridCollectionSummaryFormat` | `Count = {0}` | how many |
+| `PropertyGridWholeNumberName` | `whole number` | |
+| `PropertyGridNumberName` | `number` | |
+| `PropertyGridBooleanName` | `true or false value` | |
+| `PropertyGridCharacterName` | `single character` | |
+| `PropertyGridTextName` | `text` | |
+| `PropertyGridDateTimeName` | `date and time` | |
+| `PropertyGridDateName` | `date` | |
+| `PropertyGridTimeName` | `time` | |
+| `PropertyGridDurationName` | `duration` | |
 
-Set them once, early. `PropertyGrid.Culture` and `PropertyGrid.DefaultCategoryName` are per grid,
-for an application that chooses its own language rather than following Windows.
+The type names are what a person would say — "whole number", not `Int32` — because they are read
+inside a sentence explaining why an edit was rejected: *'abc' is not a valid whole number.*
+`PropertyGridText.NameOf(Type)` is that lookup, if you want the same words somewhere else.
+
+Nothing is cached. A key is read where it is used, so an override reaches every sentence built from
+then on whether it was declared before the first grid existed or after — and an override put
+straight into `Application.Resources` wins over the library's default either way round, because the
+library merges its dictionary at the bottom of the collection.
+
+`PropertyGrid.Culture` and `PropertyGrid.DefaultCategoryName` are per grid, for an application that
+chooses its own language rather than following Windows. A name set on the grid wins over
+`PropertyGridDefaultCategoryName`; clearing it asks for the key back.
+
+The grid does not translate what you put in it. A property's name, its category and its description
+are yours, and reach the grid already in whatever language you chose — through `[Display]`,
+`[DisplayName]`, `[Category]`, `[Description]`, `PropertyGridMetadata` or `AutoGeneratingProperty`.
 
 [localisation.md](localisation.md) has all of this translated into nine languages, contributed by an
 application that ships in them.
 
-> **Do it in `OnLaunched`, not in the `App` constructor.** Reading
+### Checking a translation at startup
+
+A resource key is not a name the compiler checks, and that is the one thing this mechanism is worse
+at than a settable property. An entry filed under a key the library no longer reads fails in
+silence: it sits in the dictionary, nobody looks at it, and the string reverts to English somewhere
+quiet — a validation message, a category header, something only a screen reader hears. A key left
+out of a translation fails the same way.
+
+`PropertyGridText.ResourceKeys` is every key listed above, so that both become a startup error
+instead:
+
+```csharp
+foreach (string key in PropertyGridText.ResourceKeys)
+{
+    if (!translated.ContainsKey(key))
+    {
+        throw new InvalidOperationException($"{key} has no translation.");
+    }
+}
+
+foreach (string key in translated.Keys)
+{
+    if (!PropertyGridText.ResourceKeys.Contains(key))
+    {
+        throw new InvalidOperationException($"{key} is not a key the grid reads.");
+    }
+}
+```
+
+Worth the twelve lines: of the fourteen run-time strings, a consumer was overriding twelve and had
+been showing the other two in English for months without noticing — with the mechanism that *did*
+fail to compile when a name changed.
+
+> **Do it in `OnLaunched`, not in the `App` constructor.** Reading or writing
 > `Application.Current.Resources` from the constructor throws `COMException 0x8000FFFF`: the
 > dictionary does not exist yet, because `InitializeComponent` only records where it comes from.
 > The process dies before the first window appears and says nothing about why, which makes it an
@@ -159,8 +224,10 @@ application that ships in them.
 ```csharp
 protected override void OnLaunched(LaunchActivatedEventArgs args)
 {
-    PropertyGridStrings.DefaultCategoryName = Loc("Varios");
-    Resources["PropertyGridSearchPlaceholderText"] = Loc("Buscar propiedades");
+    Resources.MergedDictionaries.Add(new ResourceDictionary
+    {
+        Source = new Uri("ms-appx:///Strings/es.xaml"),
+    });
 
     window = new MainWindow();
     window.Activate();

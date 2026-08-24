@@ -131,10 +131,13 @@
     <CornerRadius x:Key="PropertyGridCornerRadius">4</CornerRadius>
 
     <!--
-        Every word the templates put on screen. Redeclare these in App.xaml the same way you would
-        redeclare a brush, and the grid speaks your language. The sentences the grid builds at run
-        time - the reasons an edit was rejected - live on PropertyGridStrings instead, because a
-        validation message has no control to ask.
+        Every word the grid says on its own account. Redeclare any of these in App.xaml the same way
+        you would redeclare a brush, and the grid speaks your language.
+
+        These first six are painted by a template. PropertyGridText.ResourceKeys lists every key
+        below, so that an application can check at startup that it has translated all of them and
+        that none of its entries is filed under a name the grid no longer reads - which would
+        otherwise revert to English without saying so.
     -->
     <x:String x:Key="PropertyGridSearchPlaceholderText">Search properties</x:String>
     <x:String x:Key="PropertyGridSelectDatePlaceholderText">Pick a date</x:String>
@@ -142,6 +145,34 @@
     <x:String x:Key="PropertyGridEditToolTipText">Edit…</x:String>
     <x:String x:Key="PropertyGridOkButtonText">OK</x:String>
     <x:String x:Key="PropertyGridCancelButtonText">Cancel</x:String>
+
+    <!--
+        And these the grid builds at run time: the name of the catch-all category, how a list is
+        summarised in its row, and the reasons an edit was rejected. They are read where they are
+        used, so an application that declares them after the first grid exists still gets them.
+
+        The formats take what their name says and nothing else: NotAValid the offending text and
+        then the type name, RequiredValue the type name, CannotConvert both type names, and
+        CollectionSummary a count. The type names below are what a person would say - "whole
+        number", not Int32 - because they are read inside a sentence explaining a rejection.
+
+        The same defaults are written out in PropertyGridText, which is what the grid falls back to
+        where there is no application to declare anything; a test holds the two to the same list.
+    -->
+    <x:String x:Key="PropertyGridDefaultCategoryName">Misc</x:String>
+    <x:String x:Key="PropertyGridNotAValidFormat">'{0}' is not a valid {1}.</x:String>
+    <x:String x:Key="PropertyGridRequiredValueFormat">A {0} is required.</x:String>
+    <x:String x:Key="PropertyGridCannotConvertFormat">A {0} cannot be used as a {1}.</x:String>
+    <x:String x:Key="PropertyGridCollectionSummaryFormat">Count = {0}</x:String>
+    <x:String x:Key="PropertyGridWholeNumberName">whole number</x:String>
+    <x:String x:Key="PropertyGridNumberName">number</x:String>
+    <x:String x:Key="PropertyGridBooleanName">true or false value</x:String>
+    <x:String x:Key="PropertyGridCharacterName">single character</x:String>
+    <x:String x:Key="PropertyGridTextName">text</x:String>
+    <x:String x:Key="PropertyGridDateTimeName">date and time</x:String>
+    <x:String x:Key="PropertyGridDateName">date</x:String>
+    <x:String x:Key="PropertyGridTimeName">time</x:String>
+    <x:String x:Key="PropertyGridDurationName">duration</x:String>
 
     <!-- Glyphs, from the symbol font so they follow the shell rather than shipping as assets. -->
     <FontFamily x:Key="PropertyGridIconFontFamily">Segoe Fluent Icons,Segoe MDL2 Assets</FontFamily>
